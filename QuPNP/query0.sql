@@ -1,4 +1,5 @@
-
+use transporte
+go
 
 if exists(select 1 from sys.sysobjects where id = object_id('mastertable','if'))
 drop function mastertable
@@ -23,9 +24,9 @@ go
 
 
 
--- restore filelistonly from 
+-- restore filelistonly from
 -- disk='C:\OLIVER\BK_TRANSPORTE22072025'
--- restore headeronly from 
+-- restore headeronly from
 -- disk='C:\OLIVER\BK_TRANSPORTE22072025'
 
 
@@ -33,7 +34,7 @@ go
 
 -- NOTA: RESTORE X SQL2022 -- EN EL HOST LOCAL
 -- =======================
--- restore database TRANSPORTE from 
+-- restore database TRANSPORTE from
 -- disk='C:\OLIVER\BK_TRANSPORTE22072025' with replace,
 -- move 'TRANSPORTE' to 'C:\OLIVER\DB\TRANSPORTE_2014.mdf',
 -- move 'TRANSPORTE_log' to 'C:\OLIVER\DB\TRANSPORTE_2014_log.ldf'
@@ -50,5 +51,3 @@ select*from sys.tables order by 1;
 -- select*from sys.master_files;
 
 -- select*from sys.procedures order by 1;
-
-
