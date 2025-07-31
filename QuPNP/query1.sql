@@ -40,3 +40,18 @@ where constraint_object_id = object_id('FK_ASIGNAR_VEHICULO_COMANDO_MASPOL')
 
 select*from mastertable('dbo.ASIGNAR_VEHICULO_COMANDO')
 select*from mastertable('dbo.MASPOL')
+
+
+select tt.name, tt.recovery_model_desc, t.name, t.physical_name,
+convert(decimal(10, 2), (size * 8.0)/ 1024)/ 1024 size_GB
+from sys.master_files t, sys.databases tt
+where t.database_id = tt.database_id
+
+
+
+
+SELECT name, type_desc,* FROM transporte.sys.database_files
+
+-- use transporte
+-- go
+-- dbcc shrinkfile (TRANSPORTE_log, 1024);
