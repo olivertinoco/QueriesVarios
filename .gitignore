@@ -1,0 +1,3 @@
+# Ignorar todos los archivos .bat y .sh en cualquier parte del repo
+*.bat
+*.sh
