@@ -1,5 +1,7 @@
 set rowcount 0
 
+me lo paso marius y hay que adaptarlo al query3
+
 ;WITH UltimoSOAT AS (
 	select V.Id_Vehiculo, V.Placa_Interna, C.NroCertificado, C.FecInicioSeguro, C.FecTerminoSeguro
 	, ROW_NUMBER() OVER (PARTITION BY V.Placa_Interna ORDER BY C.FecTerminoSeguro desc) AS Fecha

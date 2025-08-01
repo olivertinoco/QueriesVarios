@@ -99,6 +99,9 @@ exec(@dato)
 
 
 
+
+set identity_insert dbo.VEHICULO on
+
 insert into dbo.vehiculo(
 Id_Vehiculo,Id_Bien,Placa_Interna,Placa_Rodaje,Placa_Anterior,Id_TipoVehiculo,Id_TipoCarroceria,Id_TipoCategoria,Id_TipoMarca,Id_TipoModelo,Anio_Modelo,Anio_Fabricacion,Id_TipoColor,Nro_Motor,Nro_Serie,Id_TipoTransmision,
 Nro_Asientos,Nro_Puertas,Nro_Llantas,Nro_Pasajeros,Id_TipoCombustible,Id_TipoOctanaje,Cilindrada,Nro_Cilindros,Nro_Ejes,Version,Id_FormulaRodante,Potencia,Longitud,Altura,Ancho,Peso_Bruto,Peso_Neto,CargaUtil,NroLectorHuella,
@@ -110,3 +113,25 @@ Nro_Asientos,Nro_Puertas,Nro_Llantas,Nro_Pasajeros,Id_TipoCombustible,Id_TipoOct
 NroSerieTablet,NroSerieCamaraIdentificacion,Id_TipoZonaRegistral,Id_TipoFuncion,Id_TipoSituacionEspecial,Id_TipoPropietario,UsuarioI,FechaI,Estado,Id_Persona,Fec_Expedicion_Tarjeta,IdDocumentoCambio,OficinaRegistral,
 PartidaRegistral,DuaDam,Titulo,FechaTitulo,Condicion,VigenciaTemporal,CodigoSunarp,Id_Proveedor
 from transporte.dbo.vehiculo
+
+set identity_insert dbo.VEHICULO off
+
+
+
+
+
+-- select V.Id_Vehiculo, V.placa_interna, AV.Id_AltaVehiculo
+-- from transporte.dbo.VEHICULO V
+-- inner join transporte.dbo.ALTA_VEHICULO AV on V.Id_Vehiculo = AV.Id_Vehiculo
+
+
+-- insert into dbo.ALTA_VEHICULO(Id_AltaVehiculo,Id_Vehiculo,Id_TipoDocumento,Nro_Documento,Fec_Documento,Observaciones,UsuarioI,FechaI,Estado)
+
+select t.*from dbo.VEHICULO t, dbo.ALTA_VEHICULO tt where t.Id_Vehiculo = tt.Id_Vehiculo
+
+
+-- select tt.Id_Vehiculo, t.*
+-- from dbo.OPERATIVIDAD_VEHICULO t, dbo.VEHICULO tt where t.placa_interna = tt.placa_interna
+
+-- update t set t.Id_Vehiculo = tt.Id_Vehiculo
+-- from dbo.OPERATIVIDAD_VEHICULO t, dbo.VEHICULO tt where t.placa_interna = tt.placa_interna
