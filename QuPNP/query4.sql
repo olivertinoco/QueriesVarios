@@ -72,4 +72,6 @@ end
 go
 
 exec dbo.usp_listarUnidades
+exec dbo.usp_listarUnidades null
+exec dbo.usp_listarUnidades default
 exec dbo.usp_listarUnidades 215655
