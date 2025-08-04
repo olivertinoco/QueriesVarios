@@ -73,6 +73,16 @@ for xml path, type).value('.','varchar(max)'))
 select(@campo)
 
 
+NOTA: ELIMINAR REFERENCIAS DE FOREIGN KEYs
+declare @campo varchar(max)=(
+select (
+select ';alter table dbo.', object_name(parent_object_id), ' drop constraint ', object_name(constraint_object_id)
+from sys.foreign_key_columns where parent_object_id = object_id('dbo.grupo_bien')
+for xml path, type).value('.','varchar(max)'))
+exec(@campo)
+
+
+
 select (select ',', t.name
 from dbo.mastertable('dbo.vehiculo') t
 outer apply(
@@ -83,7 +93,8 @@ order by t.column_id
 for xml path, type).value('.','varchar(max)')
 
 
-
+NOTA: PERMITIR CAMPOS EN VALOR NULO
+===================================
 declare @dato varchar(max) = (
 select (
 select ';alter table dbo.vehiculo alter column ',  t.name, ' ', t.type,
