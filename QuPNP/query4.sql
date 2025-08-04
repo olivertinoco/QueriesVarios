@@ -18,6 +18,12 @@ set language english
 ,tmp001_operatividad as(
     select*from(values(2),(3),(7),(12),(13),(14),(15),(18),(19),(22),(24))t(Id_TipoEstado)
 )
+,tmp001_cabeceras(dato) as(
+select 'Id_Vehiculo|Placa_Interna|Placa_Rodaje|Id_TipoVehiculo|Tipo Vehiculo|Id_TipoMarca|Tipo Marca|\
+Id_TipoModelo|Tipo Modelo|Anio_Fabricacion|Id_TipoColor|Tipo Color|Nro_Motor|Nro_Serie|Nro_Cilindros|\
+Id_TipoTransmision|TIPO TRANSMISION|Id_TipoCombustible|Tipo Combustible|Id_UnidadDestino|UltimaUnidad|\
+Id_TipoEstadoOpeVehiculo|Cantidad|Vehiculos|NroCertificado|FecTerminoSeguro'
+)
 select stuff((select r,
 v.Id_Vehiculo, t, v.Placa_Interna, t, v.Placa_Rodaje, t, v.Id_TipoVehiculo, t, tv.DescripcionL, t,
 v.Id_TipoMarca, t, TM.DescripcionL, t, v.Id_TipoModelo, t, isnull(tm.DescripcionL, ''), t, v.Anio_Fabricacion, t,
@@ -59,11 +65,13 @@ and v.Id_TipoMarca = tm.Id_TipoMarca
 and v.Id_TipoTransmision = tt.Id_TipoTransmision
 and v.Id_TipoCombustible = tc.Id_TipoCombustible
 order by t.Id_UnidadDestino
-for xml path, type).value('.','varchar(max)'),1,1,'')
-from tmp001_sep
+for xml path, type).value('.','varchar(max)'), 1, 0, c.dato)
+from tmp001_sep, tmp001_cabeceras c
 
 end
 go
 
 exec dbo.usp_listarUnidades
+exec dbo.usp_listarUnidades null
+exec dbo.usp_listarUnidades default
 exec dbo.usp_listarUnidades 215655
