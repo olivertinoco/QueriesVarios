@@ -22,7 +22,7 @@ set language english
 select 'Id_Vehiculo|Placa_Interna|Placa_Rodaje|Id_TipoVehiculo|Tipo Vehiculo|Id_TipoMarca|Tipo Marca|\
 Id_TipoModelo|Tipo Modelo|Anio_Fabricacion|Id_TipoColor|Tipo Color|Nro_Motor|Nro_Serie|Nro_Cilindros|\
 Id_TipoTransmision|TIPO TRANSMISION|Id_TipoCombustible|Tipo Combustible|Id_UnidadDestino|UltimaUnidad|\
-Id_TipoEstadoOpeVehiculo|Cantidad|Vehiculos|NroCertificado|FecTerminoSeguro'
+Id_TipoEstadoOpeVehiculo|Cantidad|xxxxxxxx|NroCertificado|FecTerminoSeguro'
 )
 select stuff((select r,
 v.Id_Vehiculo, t, v.Placa_Interna, t, v.Placa_Rodaje, t, v.Id_TipoVehiculo, t, tv.DescripcionL, t,
