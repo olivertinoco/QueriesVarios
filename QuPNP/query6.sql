@@ -14,8 +14,8 @@ where parent_object_id = object_id(@tabla)
 
 select*into #tmp001_operatividadSISPAP from mastertable(@tabla)
 
-select*from dbo.OPERATIVIDAD_VEHICULO
-return
+-- select*from dbo.OPERATIVIDAD_VEHICULO
+-- return
 -- select distinct Id_TipoEstadoOpeVehiculo from dbo.OPERATIVIDAD_VEHICULO
 -- select distinct Id_TipoEstadoOpeOdometro from dbo.OPERATIVIDAD_VEHICULO
 -- SELECT * FROM dbo.TIPO_ESTADO_OPERATIVIDAD

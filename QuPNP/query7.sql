@@ -1,37 +1,29 @@
-use transporte;
--- set rowcount 200
--- exec sp_spaceused OPERATIVIDAD_VEHICULO
+set rowcount 0
+-- select top 20 *from dbo.OPERATIVIDAD_VEHICULO
+-- delete from dbo.OPERATIVIDAD_VEHICULO
 
--- select*from dbo.tipo_estado_registro
--- select*from sispap1.dbo.tipo_estado_registro
 
-select top 20 *from sispap1.dbo.OPERATIVIDAD_VEHICULO
+exec sys.sp_spaceused OPERATIVIDAD_VEHICULO
+exec transporte.sys.sp_spaceused OPERATIVIDAD_VEHICULO
+return
 
-;with tmp001_opera as(
-select distinct top 1000 id_vehiculo
-from(select row_number()over(partition by id_vehiculo order by (select 1))item, id_vehiculo
-from dbo.OPERATIVIDAD_VEHICULO)t where item > 20
-)
+
+set identity_insert dbo.OPERATIVIDAD_VEHICULO on
+
+insert into dbo.OPERATIVIDAD_VEHICULO(
+Id_Operatividad_Vehiculo, Id_Vehiculo, Placa_Interna,Id_TipoEstadoOpeVehiculo,Id_TipoEstadoOpeOdometro,
+IdTipoMotivoInoperatividad, Id_TipoEstadoVehiculo, Id_TipoMaestranza, Id_TipoDocumento,
+Nro_Documento, Fec_Documento, Fec_Operatividad, Observacion, UsuarioI, FechaI, Estado)
 select
 Id_Operatividad_Vehiculo, Id_Vehiculo, Placa_Interna,
-Id_TipoEstadoRegistro, Id_TipoEstadoRegistro2,
+nullif(coalesce(nullif(Id_TipoEstadoRegistro, 2), nullif(Id_TipoEstadoRegistro2, 2), 3), 3) Id_TipoEstadoOpeVehiculo,
+nullif(coalesce(nullif(Id_TipoEstadoRegistro, 1), nullif(Id_TipoEstadoRegistro2, 1), 3), 3) Id_TipoEstadoOpeOdometro,
 IdTipoMotivoInoperatividad, Id_TipoEstadoVehiculo, Id_TipoMaestranza, Id_TipoDocumento,
 Nro_Documento, Fec_Documento, Fec_Operatividad, Observacion, UsuarioI, FechaI, Estado
-from(select lead(Id_TipoEstadoRegistro)over(partition by id_vehiculo order by fechaI desc) Id_TipoEstadoRegistro2,*
-from(select row_number()over(partition by t.id_vehiculo order by t.fechaI desc)item2, t.*
-from dbo.OPERATIVIDAD_VEHICULO t, tmp001_opera tt where t.id_vehiculo = tt.id_vehiculo)t,(values(1),(2))tt(item)
-where t.item2 = tt.item)t
-where not Id_TipoEstadoRegistro2 is null
-order by t.id_vehiculo, t.fechaI desc
+from(select lead(Id_TipoEstadoRegistro)over(partition by t.id_vehiculo order by t.fechaI desc) Id_TipoEstadoRegistro2,t.*
+from(select row_number()over(partition by id_vehiculo order by fechaI desc)item, *
+from transporte.dbo.OPERATIVIDAD_VEHICULO)t cross apply (values(1),(2))tt(item)
+where t.item = tt.item)t
+where not t.Id_TipoEstadoRegistro2 is null
 
-
-
-
-
-
-
-
-
-
--- Id_TipoEstadoOpeOdometro
--- Id_TipoEstadoOpeVehiculo
+set identity_insert dbo.OPERATIVIDAD_VEHICULO off
