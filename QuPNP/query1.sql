@@ -74,6 +74,7 @@ select(@campo)
 
 
 NOTA: ELIMINAR REFERENCIAS DE FOREIGN KEYs
+===========================================
 declare @campo varchar(max)=(
 select (
 select ';alter table dbo.', object_name(parent_object_id), ' drop constraint ', object_name(constraint_object_id)
