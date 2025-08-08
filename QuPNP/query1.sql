@@ -75,6 +75,8 @@ select(@campo)
 
 NOTA: ELIMINAR REFERENCIAS DE FOREIGN KEYs
 ===========================================
+The object 'FK_PROG_VEHICULO_PROGRAMACION' is dependent on column 'Id_Programacion'.
+
 declare @campo varchar(max)=(
 select (
 select ';alter table dbo.', object_name(parent_object_id), ' drop constraint ', object_name(constraint_object_id)
