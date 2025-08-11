@@ -1,11 +1,11 @@
-use transporte
+use transporte;
 set rowcount 200
 
--- Cip_Usuario
-select*
-from ASIGNAR_VEHICULO_COMANDO t
+-- select NOMBDEP from Mae_UBIGEO
 
--- select*from sispap1.dbo.vehiculo
+
+-- -- Cip_Usuario
+select*from ASIGNAR_VEHICULO_COMANDO t
 
 select*from sispap1.dbo.tipo_grado
 -- select*from MASPOL
@@ -13,6 +13,5 @@ select*from sispap1.dbo.tipo_grado
 select*from sispap1.dbo.masterPNP tt
 -- where t.Cip_Usuario = tt.cip
 
--- select*from sispap1.dbo.masterPNP
-
--- select*from sys.tables order by 1
+select*from dbo.TIPO_SITUACION_POLICIAL
+select * from dbo.MasterPNP

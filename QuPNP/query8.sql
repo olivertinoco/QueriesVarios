@@ -1,15 +1,20 @@
-set rowcount 150
+set rowcount 10
+-- set language english
 
-set language english
+-- delete from dbo.PROG_VEHICULO
+-- DBCC CHECKIDENT ('dbo.PROG_VEHICULO', RESEED, 0);
 
--- select*from dbo.PROG_VEHICULO
+-- select distinct try_cast(Cilindrada as numeric(8,2)) from dbo.PROG_VEHICULO order by 1
+
 select*from dbo.SERVICIO_VEHICULO_LR
 select*from dbo.tipo_dotacion_gd order by Id_TipoFuncion
-select*from dbo.tipo_funcion
+-- select*from dbo.tipo_funcion
+select*from dbo.PROG_VEHICULO
+select*from dbo.PROG_DOTACION
+
+
 
 return
-
-
 ;with tmp001_soat as(
     select*from(select row_number()over(partition by IdVehiculo order by FecTerminoSeguro desc) item,
     IdVehiculo, NroCertificado, FecTerminoSeguro from dbo.certificado)t where item = 1
@@ -25,23 +30,27 @@ Id_TipoProcedencia,Cilindrada,Nro_Motor,Nro_Serie,Kilometraje,Id_TipoEstadoOpeVe
 Id_TipoEstadoOpeOdometro,Fec_Operatividad,Id_TipoMotivoInoperatividad,
 Id_TipoFuncion,Id_Grifo,Nro_Certificado,Fec_TerminoSOAT,
 CIP_Conductor,Grado_Conductor,CIP_OperadorLR,Grado_OperadorLR,UsuarioI,FechaI,Activo,Estado)
+
 select v.id_vehiculo, v.placa_interna, v.placa_rodaje, g.Id_TipoRegistro, o.Id_TipoEstadoVehiculo,
 p.mes, p.anno, '', isnull(u.Id_Unidad,''),
 o.Id_TipoMaestranza, v.Id_TipoVehiculo, v.Id_TipoColor, left(v.Id_TipoCombustible,5), v.Id_TipoOctanaje,
 g.Id_TipoProcedencia, left(v.Cilindrada,5), left(v.Nro_Motor,30), left(v.Nro_Serie,35), null, isnull(o.Id_TipoEstadoOpeVehiculo,''),
 isnull(o.Id_TipoEstadoOpeOdometro, 0), isnull(o.Fec_Operatividad,''), o.IdTipoMotivoInoperatividad,
 v.Id_TipoFuncion, null, left(s.NroCertificado,20), s.FecTerminoSeguro,
-isnull(m.cip,''), isnull(m.idGrado,''), isnull(m.cip,''), isnull(m.idGrado,''), 'sistemas', getdate(), 1, 1
+isnull(m.cip,''), isnull(m.idGrado,''), '', 0, 'sistemas', getdate(), 1, 1
 from dbo.vehiculo v cross apply tmp001_periodo p
 outer apply(select*from dbo.grupo_bien g where g.id_grupobien = v.id_grupobien)g
 outer apply(select*from dbo.operatividad_vehiculo o where o.id_vehiculo = v.id_vehiculo)o
 outer apply(select*from dbo.asignar_vehiculo_unidad a where a.id_vehiculo = v.id_vehiculo)a
 outer apply(select*from dbo.unidad u where u.CodUni = a.Id_UnidadDestino)u
-outer apply(select*from dbo.masterPNP m where m.IdUnidad = a.Id_UnidadDestino)m
+outer apply(select*from dbo.masterPNP m where m.IdUnidad = a.Id_UnidadDestino and m.IdSitPol = 1)m
 outer apply(select*from tmp001_soat s where s.IdVehiculo = v.Id_Vehiculo)s
-where not exists(select 1 from dbo.PROG_VEHICULO pv where rtrim(pv.Placa_Interna) = rtrim(v.placa_interna)
+where try_cast(v.Cilindrada as numeric(8,2)) between 1000.00 and 1800.00
+and not exists(select 1 from dbo.PROG_VEHICULO pv where rtrim(pv.Placa_Interna) = rtrim(v.placa_interna)
 and pv.Anio = p.anno and pv.Mes = p.mes)
 
+
+-- select*from dbo.PROG_VEHICULO
 return
 select count(1) from dbo.PROG_VEHICULO
 
@@ -51,19 +60,32 @@ from dbo.PROG_VEHICULO)t where item > 1
 return
 
 
--- insert into dbo.MasterPNP
+
+begin try
+
+insert into dbo.MasterPNP
 select
 str(CAST(RAND(CHECKSUM(NEWID())) * 900000000 + 100000000 AS BIGINT), 9, 0),
 str(t.ma76, 8, 0), str(t.ma98, 8, 0),
 left(ltrim(t.APEPAT), 90), left(ltrim(t.APEMAT), 90),
 left(ltrim(t.NOMBRE), 90), t.ma02, left(ltrim(t.DescripcionC),90),
-tt.id_unidad, tt.UltimaUnidad, 1, 'ACTIVIDAD', getdate(), getdate()
-from(select row_number()over(order by (select 1))item, ma76, ma98, APEPAT, APEMAT, NOMBRE, ma02, tt.DescripcionC
+tt.id_unidad, tt.UltimaUnidad, ma04, descSitPol, fnac, fing
+from(select row_number()over(order by (select 1))item,
+t.ma76, t.ma98, t.APEPAT, t.APEMAT, t.NOMBRE, t.ma02, t.ma04, sp.DescripcionL descSitPol,
+convert(date, stuff(stuff(right(concat('0', ltrim(str(t.ma24,8))),8),3,0,'/'),6,0,'/'), 103) fnac,
+convert(date, stuff(stuff(right(concat('0', ltrim(str(t.ma25,8))),8),3,0,'/'),6,0,'/'), 103) fing,
+tt.DescripcionC
 from transporte.dbo.MASPOL t cross apply transporte.dbo.Tipo_Grado tt
-where t.ma02 = tt.Id_TipoGrado)t cross apply
+cross apply transporte.dbo.TIPO_SITUACION_POLICIAL sp
+where t.ma02 = tt.Id_TipoGrado and t.ma04 = sp.Id_TipoSituacionPolicial and t.ma04 != 6)t cross apply
 (select row_number()over(order by (select 1))item, id_unidad, UltimaUnidad
 from dbo.unidad)tt
 where t.item = tt.item
+
+end try
+begin catch
+    select error_message()
+end catch
 
 
 -- ma04 (tipo situacion)
@@ -112,53 +134,74 @@ select*from TIPO_COMBUSTIBLE
 -- Rango_Cilindrada,RendimientoxGln,Id_TipoFuncion,RKxG_Menor,RKxG_Mayor,Activo,Estado)
 select rango, rendimiento, id_tipoFuncion, menor, mayor, 1, 1
 from(values
-('1026-1150', 35.7, 50, 3, 1),
-('1026-1150', 35.7, 50, 4.5, 2),
-('1026-1150', 35.7, 50, 4.5, 5),
-('1026-1150', 35.7, 50, 6, 3),
-('1026-1150', 35.7, 50, 6, 9),
-('1026-1150', 35.7, 50, 6.5, 4),
+('1026.1150', 35.7, 50, 3, 1),
+('1026.1150', 35.7, 50, 4.5, 2),
+('1026.1150', 35.7, 50, 4.5, 5),
+('1026.1150', 35.7, 50, 6, 3),
+('1026.1150', 35.7, 50, 6, 9),
+('1026.1150', 35.7, 50, 6.5, 4),
 
-('1151-1250', 33.8, 47.3, 3.5, 1),
-('1151-1250', 33.8, 47.3, 4.5, 2),
-('1151-1250', 33.8, 47.3, 4.5, 5),
-('1151-1250', 33.8, 47.3, 6.5, 3),
-('1151-1250', 33.8, 47.3, 6.5, 9),
-('1151-1250', 33.8, 47.3, 7, 4),
+('1151.1250', 33.8, 47.3, 3.5, 1),
+('1151.1250', 33.8, 47.3, 4.5, 2),
+('1151.1250', 33.8, 47.3, 4.5, 5),
+('1151.1250', 33.8, 47.3, 6.5, 3),
+('1151.1250', 33.8, 47.3, 6.5, 9),
+('1151.1250', 33.8, 47.3, 7, 4),
 
-('1251-1350', 32.1, 45, 3.5, 1),
-('1251-1350', 32.1, 45, 5, 2),
-('1251-1350', 32.1, 45, 5, 5),
-('1251-1350', 32.1, 45, 7, 3),
-('1251-1350', 32.1, 45, 7, 9),
-('1251-1350', 32.1, 45, 7.5, 4),
+('1251.1350', 32.1, 45, 3.5, 1),
+('1251.1350', 32.1, 45, 5, 2),
+('1251.1350', 32.1, 45, 5, 5),
+('1251.1350', 32.1, 45, 7, 3),
+('1251.1350', 32.1, 45, 7, 9),
+('1251.1350', 32.1, 45, 7.5, 4),
 
-('1351-1450', 30.7, 42, 3.5, 1),
-('1351-1450', 30.7, 42, 5, 2),
-('1351-1450', 30.7, 42, 5, 5),
-('1351-1450', 30.7, 42, 7, 3),
-('1351-1450', 30.7, 42, 7, 9),
-('1351-1450', 30.7, 42, 8, 4),
+('1351.1450', 30.7, 42, 3.5, 1),
+('1351.1450', 30.7, 42, 5, 2),
+('1351.1450', 30.7, 42, 5, 5),
+('1351.1450', 30.7, 42, 7, 3),
+('1351.1450', 30.7, 42, 7, 9),
+('1351.1450', 30.7, 42, 8, 4),
 
-('1451-1550', 29.4, 41.1, 3.5, 1),
-('1451-1550', 29.4, 41.1, 5.5, 2),
-('1451-1550', 29.4, 41.1, 5.5, 5),
-('1451-1550', 29.4, 41.1, 7.5, 3),
-('1451-1550', 29.4, 41.1, 7.5, 9),
-('1451-1550', 29.4, 41.1, 8, 4),
+('1451.1550', 29.4, 41.1, 3.5, 1),
+('1451.1550', 29.4, 41.1, 5.5, 2),
+('1451.1550', 29.4, 41.1, 5.5, 5),
+('1451.1550', 29.4, 41.1, 7.5, 3),
+('1451.1550', 29.4, 41.1, 7.5, 9),
+('1451.1550', 29.4, 41.1, 8, 4),
 
-('1551-1650', 28.2, 39.5, 4, 1),
-('1551-1650', 28.2, 39.5, 5.5, 2),
-('1551-1650', 28.2, 39.5, 5.5, 5),
-('1551-1650', 28.2, 39.5, 8, 3),
-('1551-1650', 28.2, 39.5, 8, 9),
-('1551-1650', 28.2, 39.5, 8.5, 4),
+('1551.1650', 28.2, 39.5, 4, 1),
+('1551.1650', 28.2, 39.5, 5.5, 2),
+('1551.1650', 28.2, 39.5, 5.5, 5),
+('1551.1650', 28.2, 39.5, 8, 3),
+('1551.1650', 28.2, 39.5, 8, 9),
+('1551.1650', 28.2, 39.5, 8.5, 4),
 
-('1651-1750', 27.1, 38, 4, 1),
-('1651-1750', 27.1, 38, 6, 2),
-('1651-1750', 27.1, 38, 6, 5),
-('1651-1750', 27.1, 38, 8, 3),
-('1651-1750', 27.1, 38, 8, 9),
-('1651-1750', 27.1, 38, 9, 4)
+('1651.1750', 27.1, 38, 4, 1),
+('1651.1750', 27.1, 38, 6, 2),
+('1651.1750', 27.1, 38, 6, 5),
+('1651.1750', 27.1, 38, 8, 3),
+('1651.1750', 27.1, 38, 8, 9),
+('1651.1750', 27.1, 38, 9, 4)
 
 )ttt(rango, menor, mayor, rendimiento, id_tipoFuncion)
+
+
+select*from dbo.tipo_dotacion_gd
+
+
+-- update tt set tt.CIP_Conductor = t.cip, tt.Grado_Conductor = t.IdGrado
+-- from(select row_number()over(order by (select 1))item, cip, IdGrado from dbo.MASTERPNP where IdSitPol = 1)t
+-- cross apply
+-- (select row_number()over(order by (select 1))item, CIP_Conductor, Grado_Conductor from dbo.PROG_VEHICULO
+-- where CIP_Conductor = '')tt
+-- where t.item = tt.item
+
+-- select t.*, tt.*
+-- from(select cip, IdGrado, DesGrado from dbo.MASTERPNP where IdSitPol = 1 and idGrado in (10,20,30))t
+-- cross apply dbo.PROG_VEHICULO tt
+-- where t.cip = tt.CIP_Conductor;
+
+-- update t set Id_TipoRegistro = 2 from dbo.PROG_VEHICULO t where Id_TipoRegistro is null;
+
+-- delete dbo.tipo_dotacion_gd
+-- DBCC CHECKIDENT ('dbo.tipo_dotacion_gd', RESEED, 0);

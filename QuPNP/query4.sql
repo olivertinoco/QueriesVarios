@@ -1,3 +1,4 @@
+-- set rowcount 100
 if exists(select 1 from sys.sysobjects where id=object_id('dbo.usp_listarUnidades','p'))
 drop procedure dbo.usp_listarUnidades
 go
@@ -16,15 +17,15 @@ set language english
     IdVehiculo, NroCertificado, FecTerminoSeguro from dbo.certificado)t where item = 1
 )
 ,tmp001_operatividad as(
-    select*from(values(2),(3),(7),(12),(13),(14),(15),(18),(19),(22),(24))t(Id_TipoEstado)
+    select*from(values(2),(3),(7),(12),(13),(14),(15),(18),(19),(22),(24))t(Id_TipoEstadoOpeVehiculo)
 )
 ,tmp001_cabeceras(dato) as(
 select 'Id_Vehiculo|Placa_Interna|Placa_Rodaje|Id_TipoVehiculo|Tipo Vehiculo|Id_TipoMarca|Tipo Marca|\
 Id_TipoModelo|Tipo Modelo|Anio_Fabricacion|Id_TipoColor|Tipo Color|Nro_Motor|Nro_Serie|Nro_Cilindros|\
 Id_TipoTransmision|TIPO TRANSMISION|Id_TipoCombustible|Tipo Combustible|Id_UnidadDestino|UltimaUnidad|\
-Id_TipoEstadoOpeVehiculo|Cantidad|xxxxxxxx|NroCertificado|FecTerminoSeguro'
+Id_TipoEstadoOpeVehiculo|Cantidad|NroCertificado|FecTerminoSeguro'
 )
-select stuff((select r,
+select concat(c.dato,(select r,
 v.Id_Vehiculo, t, v.Placa_Interna, t, v.Placa_Rodaje, t, v.Id_TipoVehiculo, t, tv.DescripcionL, t,
 v.Id_TipoMarca, t, TM.DescripcionL, t, v.Id_TipoModelo, t, isnull(tm.DescripcionL, ''), t, v.Anio_Fabricacion, t,
 isnull(v.Id_TipoColor, ''), t, isnull(tcc.DescripcionL, ''), t, isnull(v.Nro_Motor, ''), t,
@@ -33,7 +34,7 @@ tc.DescripcionL, t, t.Id_UnidadDestino, t, t.UltimaUnidad, t, t.Id_TipoEstadoOpe
 row_number() over(partition by t.Id_UnidadDestino order by (select 1)), t, s.NroCertificado, t, s.FecTerminoSeguro
 from dbo.VEHICULO v
 cross apply(
-    select t.id, t.Id_UnidadDestino, t.UltimaUnidad, tt.Id_TipoEstadoOpeVehiculo
+    select top 100 t.id, t.Id_UnidadDestino, t.UltimaUnidad, tt.Id_TipoEstadoOpeVehiculo
     from(
         select*from(select Id_UnidadDestino, UltimaUnidad, id
         from(select row_number()over(partition by id order by id, fechai desc) item, id, Id_UnidadDestino, UltimaUnidad
@@ -46,9 +47,10 @@ cross apply(
     cross apply(
     select Id_TipoEstadoOpeVehiculo, id
     from(select row_number()over(partition by id order by id, fechai desc) item, id, Id_TipoEstadoOpeVehiculo
-        from(select Id_Vehiculo id, Id_TipoEstadoOpeVehiculo, fechai
-            from dbo.OPERATIVIDAD_VEHICULO t cross apply tmp001_operatividad tt
-            where t.Id_TipoEstadoOpeVehiculo = tt.Id_TipoEstado)t
+        from(select Id_Vehiculo id, t.Id_TipoEstadoOpeVehiculo, fechai
+            from dbo.OPERATIVIDAD_VEHICULO t
+            -- cross apply tmp001_operatividad tt where t.Id_TipoEstadoOpeVehiculo = tt.Id_TipoEstadoOpeVehiculo
+            )t
         )t where t.item = 1 order by t.id offset 0 rows
     )tt where tt.id = t.id
 )t
@@ -65,13 +67,13 @@ and v.Id_TipoMarca = tm.Id_TipoMarca
 and v.Id_TipoTransmision = tt.Id_TipoTransmision
 and v.Id_TipoCombustible = tc.Id_TipoCombustible
 order by t.Id_UnidadDestino
-for xml path, type).value('.','varchar(max)'), 1, 0, c.dato)
+for xml path, type).value('.','varchar(max)'))
 from tmp001_sep, tmp001_cabeceras c
 
 end
 go
 
 exec dbo.usp_listarUnidades
-exec dbo.usp_listarUnidades null
-exec dbo.usp_listarUnidades default
-exec dbo.usp_listarUnidades 215655
+-- exec dbo.usp_listarUnidades null
+-- exec dbo.usp_listarUnidades default
+-- exec dbo.usp_listarUnidades 215655
