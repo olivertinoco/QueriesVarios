@@ -6,12 +6,12 @@ set rowcount 10
 
 -- select distinct try_cast(Cilindrada as numeric(8,2)) from dbo.PROG_VEHICULO order by 1
 
+select count(1)  from dbo.operatividad_vehiculo
+
 select*from dbo.SERVICIO_VEHICULO_LR
-select*from dbo.tipo_dotacion_gd order by Id_TipoFuncion
--- select*from dbo.tipo_funcion
+select*from dbo.tipo_dotacion_gd
 select*from dbo.PROG_VEHICULO
 select*from dbo.PROG_DOTACION
-
 
 
 return
