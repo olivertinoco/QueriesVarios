@@ -1,6 +1,8 @@
-set rowcount 10
+set rowcount 0
 -- set language english
 
+select*from dbo.PROG_DOTACION
+return
 -- delete from dbo.PROG_VEHICULO
 -- DBCC CHECKIDENT ('dbo.PROG_VEHICULO', RESEED, 0);
 
