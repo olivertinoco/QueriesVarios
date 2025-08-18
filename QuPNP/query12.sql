@@ -12,7 +12,8 @@ set language english
 )
 ,tmp001_cab as(
     select 'Id Dotacion|Id Prog Veh|Id Vehiculo|Placa Interna|Id SerVehLR|\
-Id TipoDotGD|GlnxDia|GlnxMes|Observacion|Usuario|Fech Ingreso|Activo|Estado' cab
+Id TipoDotGD|GlnxDia|GlnxMes|Observacion|Usuario|Fech Ingreso|Activo|Estado~\
+100|100|100|100|100|100|100|100|100|100|100|100|100' cab
 )
 select concat(cab, (select r,
 Id_ProgDotacion, t, Id_ProgVehiculo, t, Id_Vehiculo, t, Placa_Interna, t, Id_ServicioVehiculoLR, t,
