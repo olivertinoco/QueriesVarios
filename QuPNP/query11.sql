@@ -30,6 +30,7 @@ if exists(select 1 from sys.sysobjects where id=object_id('dbo.udf_dotacionPolic
 drop function dbo.udf_dotacionPolicia
 go
 create function dbo.udf_dotacionPolicia(
+@Id_TipoCombustible varchar(5),
 @cilindrada int,
 @id_tipoFuncion int,
 @dias tinyint,
@@ -37,7 +38,8 @@ create function dbo.udf_dotacionPolicia(
 )returns table as return(
     select Id_TipoDotacionGD, RendimientoxGln,
     case Id_TipoFuncion when 1 then @habiles else @dias end * isnull(try_cast(RendimientoxGln as numeric(5,2)), 0) galMes
-    from dbo.tipo_dotacion_gd where Id_TipoFuncion = @id_tipoFuncion
+    from dbo.tipo_dotacion_gd where rtrim(Id_TipoCombustible) = @Id_TipoCombustible
+    and Id_TipoFuncion = @id_tipoFuncion
     and @cilindrada between parsename(Rango_Cilindrada, 2) and parsename(Rango_Cilindrada, 1)
     and Activo = 1 and Estado = 1
 )
