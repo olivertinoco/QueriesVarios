@@ -17,12 +17,31 @@ Id TipoDotGD|GlnxDia|GlnxMes|Observacion|Usuario|Fech Ingreso|Activo|Estado~\
 )
 ,tmp002_cab as(
     select cab =
-'Id_ProgVehiculo|Id_Vehiculo|Placa_Interna|Placa_Rodaje|Id_TipoRegistro|Id_TipoEstadoVehiculo|Mes|Anio|\
+'Id_Prog|Id_Vehi|Placa_Interna|Placa_Rodaje|Id_TipoRegistro|Id_TipoEstadoVehiculo|Mes|Anio|\
 CodRev|Id_Unidad|Id_TipoMaestranza|Id_TipoVehiculo|Id_TipoColor|Id_TipoCombustible|Id_TipoOctanaje|\
 Id_TipoProcedencia|Cilindrada|Nro_Motor|Nro_Serie|Kilometraje|Id_TipoEstadoOpeVehiculo|Id_TipoEstadoOpeOdometro|\
 Fec_Operatividad|Id_TipoMotivoInoperatividad|Id_TipoFuncion|Id_Grifo|Nro_Certificado|Fec_TerminoSOAT|\
 CIP_Conductor|Grado_Conductor|CIP_OperadorLR|Grado_OperadorLR~\
-100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100'
+100|150|150|150|150|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100'
+)
+,tmp001_tipo_funcion(data) as(
+    select stuff((select r, Id_TipoFuncion, t, DescripcionL from dbo.tipo_funcion where estado = 1 and activo = 1
+    order by DescripcionL
+    for xml path, type).value('.','varchar(max)'),1,1,i)
+    from tmp001_sep
+)
+,tmp001_tipo_registro(data) as(
+    select stuff((select r, Id_TipoRegistro, t, DescripcionL from dbo.tipo_registro where estado = 1 and activo = 1
+    order by DescripcionL
+    for xml path, type).value('.','varchar(max)'),1,1,i)
+    from tmp001_sep
+)
+,tmp001_tipo_vehiculo(data) as(
+    select stuff((select r, Id_TipoVehiculo, t, DescripcionL from dbo.tipo_vehiculo
+    where estado = 1 and activo = 1 and Id_TipoVehiculo != 0
+    order by DescripcionL
+    for xml path, type).value('.','varchar(max)'),1,1,i)
+    from tmp001_sep
 )
 ,tmp001_prog_dotacion(data) as(
     select concat(cab, (select r,
@@ -42,11 +61,13 @@ CIP_Conductor|Grado_Conductor|CIP_OperadorLR|Grado_OperadorLR~\
     Id_TipoMotivoInoperatividad, t, Id_TipoFuncion, t, Id_Grifo, t, Nro_Certificado, t, convert(varchar, Fec_TerminoSOAT, 23), t,
     CIP_Conductor, t, Grado_Conductor, t, CIP_OperadorLR, t, Grado_OperadorLR
     from dbo.PROG_VEHICULO
-    -- where id_tipoFuncion != 7
+    where id_tipoFuncion != 7
     for xml path, type).value('.','varchar(max)'))
     from tmp001_sep, tmp002_cab
 )
-select concat(t.data, tt.data) data from tmp001_prog_dotacion t, tmp001_prog_vehiculo tt
+select concat(t.data, tt.data, ttt.data, tttt.data, ttttt.data) data
+from tmp001_prog_dotacion t, tmp001_prog_vehiculo tt, tmp001_tipo_funcion ttt,
+tmp001_tipo_registro tttt, tmp001_tipo_vehiculo ttttt
 
 end
 go
