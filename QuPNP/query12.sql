@@ -12,17 +12,17 @@ set language english
 )
 ,tmp001_cab as(
     select 'Id Dotacion|Id Prog Veh|Id Vehiculo|Placa Interna|Id SerVehLR|\
-Id TipoDotGD|GlnxDia|GlnxMes|Observacion|Usuario|Fech Ingreso|Activo|Estado~\
-100|100|100|100|100|100|100|100|100|100|100|100|100' cab
+Id TipoDotGD|GlnxDia|GlnxMes|Observacion~100|100|100|100|100|100|100|100|100' cab
 )
 ,tmp002_cab as(
     select cab =
-'Id_Prog|Id_Vehi|Placa_Interna|Placa_Rodaje|Id_TipoRegistro|Id_TipoEstadoVehiculo|Mes|Anio|\
-CodRev|Id_Unidad|Id_TipoMaestranza|Id_TipoVehiculo|Id_TipoColor|Id_TipoCombustible|Id_TipoOctanaje|\
-Id_TipoProcedencia|Cilindrada|Nro_Motor|Nro_Serie|Kilometraje|Id_TipoEstadoOpeVehiculo|Id_TipoEstadoOpeOdometro|\
-Fec_Operatividad|Id_TipoMotivoInoperatividad|Id_TipoFuncion|Id_Grifo|Nro_Certificado|Fec_TerminoSOAT|\
+'a|b|c|Id_Prog|Id_Vehi|Placa_Interna|Placa_Rodaje|TipoRegistro|Est Vehiculo|Mes|Anio|\
+CodRev|Unidad|Maestranza|TipoVehiculo|TipoColor|TipoCombustible|TipoOctanaje|\
+TipoProcedencia|Cilindrada|Nro Motor|Serie|Kilometraje|EstadoOpe|EstadoOdometro|\
+Fec_Operatividad|Mot. Inopera|TipoFuncion|Grifo|Certificado|Fec_TerminoSOAT|\
 CIP_Conductor|Grado_Conductor|CIP_OperadorLR|Grado_OperadorLR~\
-100|150|150|150|150|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100'
+5|5|5|100|150|150|150|150|100|100|100|100|100|100|100|100|100|100|100|100|\
+100|100|100|100|100|100|100|100|100|100|100|100|100|100|100'
 )
 ,tmp001_tipo_funcion(data) as(
     select stuff((select r, Id_TipoFuncion, t, DescripcionL from dbo.tipo_funcion where estado = 1 and activo = 1
@@ -45,23 +45,41 @@ CIP_Conductor|Grado_Conductor|CIP_OperadorLR|Grado_OperadorLR~\
 )
 ,tmp001_prog_dotacion(data) as(
     select concat(cab, (select r,
-    Id_ProgDotacion, t, Id_ProgVehiculo, t, Id_Vehiculo, t, Placa_Interna, t, Id_ServicioVehiculoLR, t,
-    Id_TipoDotacionGD, t, GlnxDia, t, GlnxMes, t, Observacion, t, UsuarioI, t, convert(varchar, FechaI, 23), t,
-    Activo, t, Estado
-    from dbo.PROG_DOTACION
+    Id_ProgDotacion, t, Id_ProgVehiculo, t, Id_Vehiculo, t, Placa_Interna, t,
+    isnull(convert(varchar, Id_ServicioVehiculoLR),'-'), t,
+    isnull(convert(varchar,Id_TipoDotacionGD), '-'), t,
+    isnull(nullif(concat(try_cast(GlnxDia as numeric(5,2)), iif(GlnxDia = '', '-', ' gal')),'0.00 gal'), '-'), t,
+    isnull(nullif(concat(convert(varchar, GlnxMes), ' gal'),'0.00 gal'), '-'),  t, isnull(Observacion, '-')
+    from dbo.PROG_DOTACION order by Id_Vehiculo
     for xml path, type).value('.','varchar(max)'))
     from tmp001_sep, tmp001_cab
 )
 ,tmp001_prog_vehiculo(data) as(
     select concat(i, cab, (select r,
-    Id_ProgVehiculo, t, Id_Vehiculo, t, Placa_Interna, t, Placa_Rodaje, t, Id_TipoRegistro, t, Id_TipoEstadoVehiculo, t,
-    Mes, t, Anio, t, CodRev, t, Id_Unidad, t, Id_TipoMaestranza, t, Id_TipoVehiculo, t, Id_TipoColor, t,
-    Id_TipoCombustible, t, Id_TipoOctanaje, t, Id_TipoProcedencia, t, Cilindrada, t, Nro_Motor, t, Nro_Serie, t,
-    Kilometraje, t, Id_TipoEstadoOpeVehiculo, t, Id_TipoEstadoOpeOdometro, t, convert(varchar, Fec_Operatividad, 23), t,
-    Id_TipoMotivoInoperatividad, t, Id_TipoFuncion, t, Id_Grifo, t, Nro_Certificado, t, convert(varchar, Fec_TerminoSOAT, 23), t,
-    CIP_Conductor, t, Grado_Conductor, t, CIP_OperadorLR, t, Grado_OperadorLR
-    from dbo.PROG_VEHICULO
-    where id_tipoFuncion != 7
+    t.Id_TipoRegistro, t, t.Id_TipoFuncion, t, t.Id_TipoVehiculo, t,
+    Id_ProgVehiculo, t, Id_Vehiculo, t, Placa_Interna, t,
+    Placa_Rodaje, t, tr.DescripcionL, t, isnull(te.DescripcionL, '-'), t, Mes, t, Anio, t, CodRev, t,
+    Id_Unidad, t, isnull(tm.DescripcionL, '-'), t, isnull(tv.DescripcionL, '-'), t,
+    isnull(tc.DescripcionL, '-'), t, isnull(tco.DescripcionL, '-'), t, isnull(toc.DescripcionL, '-'), t,
+    isnull(tp.DescripcionL, '-'), t, Cilindrada, t, Nro_Motor, t, Nro_Serie, t, isnull(Kilometraje, '-'), t,
+    isnull(tope.DescripcionL, '-'), t, isnull(odo.DescripcionL, '-'), t, convert(varchar, Fec_Operatividad, 23), t,
+    isnull(tino.DescripcionL, '-'), t, isnull(fn.DescripcionL, '-'), t, isnull(Id_Grifo,'-'), t, Nro_Certificado, t,
+    convert(varchar, Fec_TerminoSOAT, 23), t, CIP_Conductor, t, isnull(tg.DescripcionL, '-'), t,
+    CIP_OperadorLR, t, Grado_OperadorLR
+    from dbo.PROG_VEHICULO t cross apply tipo_registro tr cross apply dbo.tipo_funcion fn
+    outer apply(select*from dbo.tipo_estado_vehiculo te where te.Id_TipoEstadoVehiculo = t.Id_TipoEstadoVehiculo )te
+    outer apply(select*from dbo.tipo_maestranza tm where tm.Id_TipoMaestranza = t.Id_TipoMaestranza)tm
+    outer apply(select*from dbo.tipo_vehiculo tv where tv.Id_TipoVehiculo = t.Id_TipoVehiculo)tv
+    outer apply(select*from dbo.tipo_color tc where tc.Id_TipoColor = t.Id_TipoColor)tc
+    outer apply(select*from dbo.tipo_combustible tco where tco.Id_TipoCombustible = t.Id_TipoCombustible)tco
+    outer apply(select*from dbo.tipo_octanaje toc where toc.Id_TipoOctanaje = t.Id_TipoOctanaje)toc
+    outer apply(select*from dbo.tipo_procedencia tp where tp.Id_TipoProcedencia = t.Id_TipoProcedencia)tp
+    outer apply(select*from dbo.tipo_estado_operatividad tope where tope.Id_TipoEstadoOperatividad = t.Id_TipoEstadoOpeVehiculo)tope
+    outer apply(select*from dbo.tipo_estado_op_odometro odo where odo.IdEstadoOperatividadOdometro = t.Id_TipoEstadoOpeOdometro)odo
+    outer apply(select*from dbo.tipo_inoperatividad tino where tino.Id_TipoInoperatividad = t.Id_TipoMotivoInoperatividad)tino
+    outer apply(select*from dbo.tipo_grado tg where tg.Id_TipoGrado = t.Grado_Conductor)tg
+    where t.id_tipoFuncion != 7 and t.Id_TipoRegistro = tr.Id_TipoRegistro and t.Id_TipoFuncion = fn.Id_TipoFuncion
+    order by t.Id_Vehiculo
     for xml path, type).value('.','varchar(max)'))
     from tmp001_sep, tmp002_cab
 )
@@ -73,6 +91,8 @@ end
 go
 
 exec dbo.usp_listaDotacionCombustible
+
+
 
 
 -- declare @data varchar(max)=(
