@@ -1,12 +1,11 @@
-set rowcount 0
 -- select text from sys.syscomments where id=object_id('dbo.usp_listarMenus22','p')
-
--- create procedure dbo.usp_listarMenus22
-declare
+go
+alter procedure dbo.usp_listarMenus22
 @data varchar(max)
-= 'varrieta|4321'
-
+as
+begin
 set nocount on
+begin try
 
 select top 0
 cast(null as varchar(100)) USER_Usuario,
@@ -25,18 +24,30 @@ insert into #tmp001_usuario exec(@data)
     t.USER_Clave256 = convert(varchar(128), hashbytes('sha2_512', tt.clave), 2)),
     'warning') Pos_id
 )
-select tt.menu_id,  ltrim(tt.menu_nombre)
-from dbo.A00_UsuariosRoles t, dbo.A00_Menus tt, tmp001_datos ttt
+select concat(ttt.Pos_id,(select r, tt.menu_id, t, ltrim(tt.menu_nombre), t, ltrim(tt.menu_router)
+from dbo.A00_UsuariosRoles t, dbo.A00_Menus tt
 where t.menu_id = tt.menu_id and t.Pos_id = try_cast(ttt.Pos_id as int)
 and t.rol_activo = 1
 order by t.menu_id
+for xml path, type).value('.','varchar(max)'))
+from tmp001_sep, tmp001_datos ttt
+
+end try
+begin catch
+    select concat('error:', error_message())
+end catch
+end
+go
+
+exec dbo.usp_listarMenus22 'varrieta|4321'
+exec dbo.usp_listarMenus22 'varrieta|43214'
 
 
--- end try
--- begin catch
---     select concat('error:', error_message())
--- end catch
--- end
 
-
--- exec dbo.usp_listarMenus22 'varrieta|4321'
+-- update t set t.menu_router = 'Submenu' from dbo.A00_Menus t where t.menu_id = '1102'
+-- update t set t.menu_router = 'SubOrganigrama' from dbo.A00_Menus t where t.menu_id = '0401'
+-- update t set t.menu_router = 'SubRQpersonal' from dbo.A00_Menus t where t.menu_id = '1004'
+-- update t set t.menu_router = 'SubCandidatos' from dbo.A00_Menus t where t.menu_id = '0104'
+-- update t set t.menu_router = 'SubVerificaPost' from dbo.A00_Menus t where t.menu_id = '0106'
+-- update t set t.menu_router = 'SubDataPostulante' from dbo.A00_Menus t where t.menu_id = '0108'
+-- go
