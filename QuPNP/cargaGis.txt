@@ -1,0 +1,33 @@
+@echo off
+setlocal
+
+REM Ajusta estas variables según tu entorno
+set "SRC_DIR=C:\OLIVER\Gis\RedVialNacionalTodoShape"
+set "CONN=MSSQL:server=127.0.0.1;driver=ODBC Driver 17 for SQL Server;database=SISPAP;UID=sa;PWD=milagros123"
+
+REM Ir a la carpeta de shapefiles (maneja rutas con espacios)
+pushd "%SRC_DIR%" || (echo No existe %SRC_DIR% & exit /b 1)
+
+for %%f in (*.shp) do (
+  echo ------------------------------------------------------------
+  echo Importando %%~nxf ...
+  c:\OSGeo4W\bin\ogr2ogr -overwrite -f MSSQLSpatial ^
+    "%CONN%" ^
+    "%%~f" ^
+    -nln dbo.geo_%%~nf ^
+    -lco GEOM_NAME=geom ^
+	-lco GEOM_TYPE=geometry ^
+	-lco PRECISION=NO ^
+	-lco DIM=2 ^
+	-makevalid ^
+	-skipfailures ^
+    --config MSSQLSPATIAL_USE_BCP FALSE
+  if errorlevel 1 (
+    echo ERROR al importar %%~nxf
+  ) else (
+    echo OK: %%~nxf
+  )
+)
+
+popd
+endlocal
