@@ -27,7 +27,7 @@ Id_TipoEstadoOpeVehiculo|Cantidad|NroCertificado|FecTerminoSeguro'
 )
 select concat(c.dato,(select r,
 v.Id_Vehiculo, t, v.Placa_Interna, t, v.Placa_Rodaje, t, v.Id_TipoVehiculo, t, tv.DescripcionL, t,
-v.Id_TipoMarca, t, TM.DescripcionL, t, v.Id_TipoModelo, t, isnull(tm.DescripcionL, ''), t, v.Anio_Fabricacion, t,
+v.Id_TipoMarca, t, TM.DescripcionL, t, v.Id_TipoModelo, t, isnull(tmc.DescripcionL, ''), t, v.Anio_Fabricacion, t,
 isnull(v.Id_TipoColor, ''), t, isnull(tcc.DescripcionL, ''), t, isnull(v.Nro_Motor, ''), t,
 isnull(v.Nro_Serie, ''), t, v.Nro_Cilindros, t, v.Id_TipoTransmision, t, tt.DescripcionL, t, v.Id_TipoCombustible, t,
 tc.DescripcionL, t, t.Id_UnidadDestino, t, t.UltimaUnidad, t, t.Id_TipoEstadoOpeVehiculo, t,
@@ -74,6 +74,23 @@ end
 go
 
 exec dbo.usp_listarUnidades
+
 -- exec dbo.usp_listarUnidades null
 -- exec dbo.usp_listarUnidades default
 -- exec dbo.usp_listarUnidades 215655
+
+
+-- select*from dbo.TIPO_MODELO WHERE DescripcionL LIKE '%toyota%'
+-- select*from dbo.TIPO_VEHICULO WHERE DescripcionL LIKE '%toyota%'
+
+set rowcount 100
+
+select*from dbo.certificado
+select*from dbo.COMPANIA_SEGURO
+
+select*from mastertable('dbo.certificado')
+select*from mastertable('dbo.COMPANIA_SEGURO')
+
+
+
+-- select*from sys.tables order by 1
