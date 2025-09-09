@@ -1,32 +1,44 @@
 -- PARA EL GENERICO:
 -- =================
-declare @vartabla varchar(500), @pos int, @data varchar(500)=(
-select
-'t.Id_AsignarVehiculoUnidad,\
-t.Id_vehiculo,\
-t.Placa_Interna,\
-tt.Placa_Rodaje,\
-tt.Id_TipoVehiculo,\
-tt.Id_TipoMarca,\
-tt.Id_TipoModelo,\
-tt.Anio_Modelo,\
-tt.Id_TipoColor,\
-tt.Id_TipoCombustible,\
-tt.Cilindrada,\
-tt.Nro_Motor,\
-tt.Nro_Serie,\
-t.Id_UnidadDestino')
-select @vartabla = 't.dbo.ASIGNAR_VEHICULO_UNIDAD,tt.dbo.VEHICULO'
+declare @tmp001_tablas table(
+item int,
+column_id int,
+tabla varchar(300),
+name varchar(300),
+length int,
+is_nullable int,
+is_identity int,
+default_object_id int,
+is_primary_key int,
+is_unique_constraint int)
+insert into @tmp001_tablas exec dbo.usp_listar_tablas
 
--- from dbo.ASIGNAR_VEHICULO_UNIDAD t, dbo.VEHICULO tt
--- outer apply(select*from dbo.tipo_vehiculo tv where tv.Id_TipoVehiculo = tt.Id_TipoVehiculo)tv
--- outer apply(select*from dbo.tipo_marca tm where tm.Id_TipoMarca = tt.Id_TipoMarca)tm
--- outer apply(select*from dbo.tipo_modelo tmo where tmo.Id_TipoModelo = tt.Id_TipoModelo)tmo
--- outer apply(select*from dbo.tipo_color tc where tc.Id_TipoColor = tt.Id_TipoColor)tc
--- outer apply(select*from dbo.tipo_combustible tcomb where tcomb.Id_TipoCombustible = tt.Id_TipoCombustible)tcomb
--- where t.Id_vehiculo = tt.Id_vehiculo
 
-set nocount off
+-- NOTA: EN ESTE PUNTO COMENZAR A PONER VALIDACIONES DEL FRONTEND
+-- ==============================================================
+
+declare @vartabla varchar(500), @pos int, @data varchar(1000)
+select @data =
+'t.Id_AsignarVehiculoUnidad.101|3434|DATA|pa|102,
+t.Id_vehiculo.110|6545,
+t.Placa_Interna.111|445,
+t.Id_UnidadDestino.115|hhi|rt,
+tt.Placa_Rodaje,
+tt.Id_TipoVehiculo,
+tt.Id_TipoMarca,
+tt.Id_TipoModelo,
+tt.Anio_Modelo,
+tt.Id_TipoColor,
+tt.Id_TipoCombustible,
+tt.Cilindrada,
+tt.Nro_Motor,
+tt.Nro_Serie'
+,@vartabla = 't.dbo.ASIGNAR_VEHICULO_UNIDAD,tt.dbo.VEHICULO'
+
+set nocount on
+
+
+
 
 declare @tabla table(
 item varchar(20),
@@ -34,7 +46,7 @@ esquema varchar(20),
 tabla varchar(100),
 campo varchar(100)
 )
-
+select @data = replace(replace(@data, char(13),''), char(10), '')
 while 1=1 begin
     select @pos = charindex(',', @data)
     if @pos = 0 begin
@@ -62,11 +74,14 @@ while 1=1 begin
     select @vartabla = stuff(@vartabla, 1, @pos, '')
 end
 
-select t.tabla, c.name, c.max_length, c.collation_name
+insert into @tabla(item,tabla, campo)
+select row_number()over(order by (select 1)) item,
+concat(t.esquema, '.', t.tabla) tabla, tt.campo
 from(select*from @tabla where campo is null)t,
-(select*from @tabla where not campo is null)tt, sys.tables u, sys.columns c
-where t.item = tt.item and schema_id(t.esquema) = u.schema_id and t.tabla = u.name
-and u.object_id = c.object_id and tt.campo = col_name(c.object_id, c.column_id)
+(select*from @tabla where not campo is null)tt where t.item = tt.item
 
-
-set rowcount 10
+select concat(tt.item, '.', tt.column_id), tt.length, tt.is_nullable
+from(select item, tabla, campo from @tabla where not try_cast(item as int) is null)t
+cross apply @tmp001_tablas tt
+where t.tabla = tt.tabla and t.campo = tt.name
+order by t.tabla, cast(t.item as int)
