@@ -1,104 +1,126 @@
--- PARA EL GENERICO:
--- =================
-declare @tmp001_tablas table(
-item int,
-column_id int,
-tabla varchar(300),
-name varchar(300),
-length int,
-is_nullable int,
-is_identity int,
-default_object_id int,
-is_primary_key int,
-is_unique_constraint int)
-insert into @tmp001_tablas
-exec dbo.usp_listar_tablas
-'dbo.PR20_SeguimientoCAB,dbo.RH10_Postulantes'
+
+select*from dbo.menu
+
+select*from dbo.menuTransportes
 
 
--- NOTA: EN ESTE PUNTO COMENZAR A PONER VALIDACIONES DEL FRONTEND
--- ==============================================================
+-- go
+-- create table dbo.menuTransportes(
+--     id_menu varchar(6),
+--     descripcion varchar(100),
+--     data_router varchar(50)
+-- )
 
-declare @vartabla varchar(500), @pos int, @data varchar(1000)
-select @data =
-'tt.Pos_DocTipoId. .43*mama,
-tt.Pos_DocNumero. .44*mama,
-tt.Pos_ApPat. .45*mama,
-tt.Pos_ApMat. .46*mama,
-tt.Pos_Nombres. .47*mama,
-tt.Pos_Id. .48*mama,
-tt.Pos_Sexo. .49*mama,
-tt.Pos_Email. .50*mama,
-t.FechaFin. .12*maria,
-t.Comentarios. .13*maria,
-t.Seg_Id. .14*maria,
-t.Proy_Id. .15*maria,
-t.Actividad.0.16*maria,
-t.Lugar. .17*maria,
-t.Responsable_Id. .18*maria,
-t.FechaTermino. .19*maria,
-t.Prioridad_Id. .120*maria,
-t.Avance. .122*maria,
-t.Estado_Id. . '
-,@vartabla = 't.dbo.PR20_SeguimientoCAB,tt.dbo.RH10_Postulantes'
+-- delete dbo.menuTransportes
+-- -- NOTA: PRIMER NIVEL
+-- insert into dbo.menuTransportes
+-- select '010000', 'Grupo Bien Policial/Seguridad', null union all
+-- select '020000', 'Carga Masiva', null union all
+-- select '030000', 'Administrar Vehiculo', null union all
+-- select '040000', 'Administrar SOAT', null union all
+-- select '050000', 'Administrar SCTR', null union all
+-- select '060000', 'Administrar Baja Vehiculo Policial/Seguridad', null union all
+-- select '070000', 'Accidentes de Transito', null union all
+-- select '080000', 'Papeletas de Infraccion', null union all
+-- select '090000', 'Exportacion de Datos', null union all
+-- select '100000', 'Mantenimientos', null
 
-set nocount on
+-- -- NOTA: SEGUNDO NIVEL
+-- insert into dbo.menuTransportes
+-- select '010100', 'Registrar/Actualizar Grupo Bien', 'RegistroGrupoBien01' union all
+-- select '020100', 'Carga Masiva Policiales', 'CargaMasivaPolicial02' union all
+-- select '020200', 'Carga Masiva Seguridad', 'CargaMasivaSeguridad02' union all
+-- select '020300', 'Carga Masiva Actualiza datos Vehiculos', null union all
+-- select '030100', 'Vehiculo Policial Existente', null union all
+-- select '030200', 'Vehiculo Seguridad Existente', null union all
+-- select '030300', 'Vehiculo Policial/Seguridad Nuevo', null union all
+-- select '040100', 'Carga Masiva SOAT', null union all
+-- select '040200', 'Registrar/Actualizar SOAT', null union all
+-- select '040300', 'Registrar/Actualizar Identificacion Vehicular', null union all
+-- select '050100', 'Carga masiva SCTR', null union all
+-- select '050200', 'Registrar/Actualizar SCTR', null union all
+-- select '060100', 'Carga Masiva Baja Vehiculo', null union all
+-- select '060200', 'Registrar/Actualiza Baja Vehiculo', null union all
+-- select '070100', 'Carga Masiva Accidentes de Transito', null union all
+-- select '070200', 'Registrar/Actualizar Accidentes de Transito', null union all
+-- select '080100', 'Registrar/Actualizar Papeletas de Infraccion', null union all
+-- select '080200', 'Notificar Papeletas de Infraccion', null union all
+-- select '090100', 'Exportar Parque Automotor Policial/Seguridad', null union all
+-- select '090200', 'Exportar Certificados SOAT', null union all
+-- select '090300', 'Exportar SCTR', null union all
+-- select '090400', 'Exportar Accidentes de Transito', null union all
+-- select '100100', 'Grupo Bien', null union all
+-- select '100200', 'Cantidad Vehiculo', null union all
+-- select '100300', 'Alta Vehiculo', null union all
+-- select '100400', 'Vehiculo', null union all
+-- select '100500', 'Vehiculo Unidad', null union all
+-- select '100600', 'Vehiculo Comando', null union all
+-- select '100700', 'Operatividad Vehiculo', null union all
+-- select '100800', 'Funcion Vehiculo', null union all
+-- select '100900', 'Baja Vehiculo', null union all
+-- select '101000', 'Certificado SOAT', null union all
+-- select '101100', 'SCTR Vehiculo', null union all
+-- select '101200', 'Accidentes de Transito', null
 
-
-
-
-declare @tabla table(
-item varchar(20),
-esquema varchar(20),
-tabla varchar(100),
-campo varchar(100),
-req varchar(1),
-param varchar(100)
-)
-select @data = replace(replace(@data, char(13),''), char(10), '')
-while 1=1 begin
-    select @pos = charindex(',', @data)
-    if @pos = 0 begin
-        insert into @tabla(item, campo, req, param) select
-        parsename(@data,4), parsename(@data,3),
-        nullif(parsename(@data,2),''), parsename(@data,1)
-        break;
-    end
-    insert into @tabla(item, campo, req, param) select
-    parsename(substring(@data, 1, @pos - 1), 4),
-    parsename(substring(@data, 1, @pos - 1), 3),
-    nullif(parsename(substring(@data, 1, @pos - 1), 2),''),
-    parsename(substring(@data, 1, @pos - 1), 1)
-    select @data = stuff(@data, 1, @pos, '')
-end
-select @pos = 1
-while 1=1 begin
-    select @pos = charindex(',', @vartabla)
-    if @pos = 0 begin
-        insert into @tabla(item, esquema, tabla)select
-        parsename(@vartabla,3), parsename(@vartabla,2),
-        parsename(@vartabla,1)
-        break;
-    end
-    insert into @tabla(item, esquema, tabla) select
-    parsename(substring(@vartabla, 1, @pos - 1), 3),
-    parsename(substring(@vartabla, 1, @pos - 1), 2),
-    parsename(substring(@vartabla, 1, @pos - 1), 1)
-    select @vartabla = stuff(@vartabla, 1, @pos, '')
-end
-
-select*from @tabla
-
-insert into @tabla(item, tabla, campo, req, param)
-select row_number()over(order by (select 1)) item,
-concat(t.esquema, '.', t.tabla) tabla, tt.campo, tt.req, tt.param
-from(select*from @tabla where campo is null)t,
-(select*from @tabla where not campo is null)tt where t.item = tt.item
-
-select concat(tt.item, '.', tt.column_id, '*', tt.length, '*',
-isnull(t.req, tt.is_nullable) ,'*', t.param)
-from(select item, tabla, campo, req, param
-from @tabla where not try_cast(item as int) is null)t
-cross apply @tmp001_tablas tt
-where t.tabla = tt.tabla and t.campo = tt.name
-order by t.tabla, cast(t.item as int)
+-- -- NOTA: TERCER NIVEL
+-- insert into dbo.menuTransportes
+-- select '030101', 'Actualiza Datos Vehiculo/Alta/Asig o Reasig', 'CrudVehiculoPolicial03' union all
+-- select '030201', 'Actualiza Datos Vehiculo/Alta/Asig o Reasig', 'CrudVehiculoSeguridad03' union all
+-- select '030301', 'Datos Vehiculo/Alta/Asig-Reasig', null union all
+-- select '100101', 'Tipo Registro', null union all
+-- select '100102', 'Tipo Estado Registro', null union all
+-- select '100103', 'Tipo Donante', null union all
+-- select '100104', 'Tipo Rubro', null union all
+-- select '100105', 'Tipo Procedencia', null union all
+-- select '100106', 'Tipo Entidad', null union all
+-- select '100107', 'Tipo Documento', null union all
+-- select '100108', 'Catalogo Bien', null union all
+-- select '100201', 'Tipo Vehiculo', null union all
+-- select '100202', 'Tipo Clase Vehiculo', null union all
+-- select '100203', 'Tipo Clasificacion Bien', null union all
+-- select '100301', 'Tipo Documento', null union all
+-- select '100401', 'Tipo Vehiculo', null union all
+-- select '100402', 'Tipo Categoria', null union all
+-- select '100403', 'Tipo Carroceria', null union all
+-- select '100404', 'Tipo Transmision', null union all
+-- select '100405', 'Tipo Combustible', null union all
+-- select '100406', 'Tipo Zona Registral', null union all
+-- select '100407', 'Tipo Situacion Especial', null union all
+-- select '100408', 'Tipo Propietario', null union all
+-- select '100409', 'Tipo Marca', null union all
+-- select '100410', 'Tipo Modelo', null union all
+-- select '100411', 'Tipo Color', null union all
+-- select '100412', 'Tipo Octanaje', null union all
+-- select '100413', 'Tipo Formula Rodante', null union all
+-- select '100414', 'Tipo Funcion', null union all
+-- select '100415', 'Tipo Modalidad Ingreso', null union all
+-- select '100416', 'Tipo Obs. Adquisicion', null union all
+-- select '100501', 'Tipo Movimiento', null union all
+-- select '100502', 'Tipo Documento', null union all
+-- select '100503', 'Tipo Ubicacion', null union all
+-- select '100504', 'Tipo Clase Unidad', null union all
+-- select '100505', 'Tipo Unidad', null union all
+-- select '100601', 'Tipo Movimiento', null union all
+-- select '100602', 'Tipo Situacion Policial', null union all
+-- select '100603', 'Tipo Documento', null union all
+-- select '100701', 'Tipo Estado Vehiculo', null union all
+-- select '100702', 'Tipo Estado Operatividad', null union all
+-- select '100703', 'Tipo Estado OP Odometro', null union all
+-- select '100704', 'Tipo Maestranza', null union all
+-- select '100801', 'Tipo Funcion', null union all
+-- select '100802', 'Tipo Documento', null union all
+-- select '100901', 'Tipo Motivo Baja Vehiculo', null union all
+-- select '100902', 'Tipo Lugar de Internamiento', null union all
+-- select '101001', 'Tipo Situacion Certificado', null union all
+-- select '101002', 'Compañia Seguro', null union all
+-- select '101003', 'Tipo Documento', null union all
+-- select '101101', 'Compañia de Seguro', null union all
+-- select '101102', 'Tipo Siniestro', null union all
+-- select '101103', 'Tipo Documento', null union all
+-- select '101104', 'Tipo Situacion SCTR', null union all
+-- select '101105', 'Monto IGV', null union all
+-- select '101201', 'Tipo Siniestro', null union all
+-- select '101202', 'Tipo Situacion Accidente', null union all
+-- select '101203', 'Tipo Expediente', null union all
+-- select '101204', 'Tipo Proceso Judicial', null union all
+-- select '101205', 'Tipo Estado Operatividad', null

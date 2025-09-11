@@ -86,8 +86,8 @@ begin
 set nocount on
 begin try
 
-;with tmp001_sep(t,r)as(
-    select*from(values('|','~'))t(sepCamp,sepReg)
+;with tmp001_sep(t,r,a)as(
+    select*from(values('|','~', ' '))t(sepCamp,sepReg,sepTab)
 )
 ,tmp001_cab as(
 select cab ='Id_AsignarVehiculoComando|\
@@ -105,7 +105,11 @@ Nro_Motor|\
 Nro_Serie|\
 Procedencia|\
 Tipo_Transmision|\
-Tipo Octanaje'
+Tipo Octanaje|\
+CIP|\
+Grado|\
+Nombres|\
+Sit Policial'
 )
 select concat(c.cab, (select r,
 t.Id_AsignarVehiculoComando, t,
@@ -123,7 +127,11 @@ tt.Nro_Motor, t,
 tt.Nro_Serie, t,
 tp.DescripcionL, t,
 tr.DescripcionL, t,
-oc.DescripcionL
+oc.DescripcionL, t,
+right((100000000 + ltrim(rtrim(mas.cip))),8), t,
+mas.DesGrado, t,
+rtrim(mas.Paterno), a, rtrim(mas.Materno), a, rtrim(mas.Nombres), t,
+mas.DesSitPol
 from dbo.ASIGNAR_VEHICULO_COMANDO t cross apply dbo.VEHICULO tt
 outer apply(select*from dbo.tipo_vehiculo tv where tv.Id_TipoVehiculo = tt.Id_TipoVehiculo)tv
 outer apply(select*from dbo.tipo_marca tm where tm.Id_TipoMarca = tt.Id_TipoMarca)tm
@@ -134,6 +142,8 @@ outer apply(select*from dbo.grupo_bien gg where gg.Id_GrupoBien = tt.Id_GrupoBie
 outer apply(select*from dbo.tipo_procedencia tp where tp.Id_TipoProcedencia = gg.Id_TipoProcedencia)tp
 outer apply(select*from dbo.tipo_transmision tr where tr.Id_TipoTransmision = tt.Id_TipoTransmision)tr
 outer apply(select*from dbo.tipo_octanaje oc where oc.Id_TipoOctanaje = tt.Id_TipoOctanaje)oc
+outer apply(select*from dbo.masterPNP mas
+where right((100000000 + ltrim(rtrim(mas.cip))),8) = right((100000000 + ltrim(rtrim(t.Cip_Usuario))),8))mas
 where t.Id_vehiculo = tt.Id_vehiculo and t.Estado = 1 and tt.Estado = 1
 and t.Cip_Usuario = @data
 for xml path, type).value('.','varchar(max)'))
@@ -147,10 +157,39 @@ end
 go
 
 
-exec usp_listar_ASIGNAR_VEHICULO_COMANDO_01 206569
+exec usp_listar_ASIGNAR_VEHICULO_COMANDO_01 113597
+
+
+
+
+set rowcount 20
+
+select*from dbo.masterPNP
+
+-- select t.*
+-- from dbo.ASIGNAR_VEHICULO_COMANDO t where Cip_Usuario = 111782
+-- select*from dbo.masterPNP where cip = 111782
+
+-- select*from mastertable('dbo.ASIGNAR_VEHICULO_COMANDO')
+-- select*from mastertable('dbo.masterPNP')
+
+
+-- cross apply dbo.VEHICULO tt
+-- where
+-- t.Id_vehiculo = tt.Id_vehiculo and t.Estado = 1 and tt.Estado = 1
+-- and
+-- t.Cip_Usuario in(
+-- select cip -- , DesGrado, Paterno, Materno, Nombres
+-- from dbo.masterPNP)
 
 
 return
+
+-- grado
+-- nombre
+-- carnet
+
+
 
 -- exec sp_spaceused ASIGNAR_VEHICULO_UNIDAD
 -- exec sp_spaceused ASIGNAR_VEHICULO_COMANDO
