@@ -1,29 +1,44 @@
--- if exists(select 1 from sys.sysobjects where id=object_id('dbo.usp_listar_tablas','p'))
--- drop procedure dbo.usp_listar_tablas
+-- ===================================================================
+-- NOTA: PARA EL GENERICO
+-- ESTO ES PARA CONSUMO TANTO DE IDA COMO DE REGRESO ES EL SP DE PIVOT
+-- EL GENERAL DE LA METADATA DE CADA TABLA U
+-- ===================================================================
+GO
+-- create table dbo.masterTablas(
+--     item int,
+--     tabla varchar(300)
+-- )
 -- go
--- create procedure dbo.usp_listar_tablas
-declare
+-- insert into dbo.masterTablas
+-- select*from(values
+-- (1, 'dbo.vehiculo'),
+-- (2, 'dbo.asignar_vehiculo_unidad'),
+-- (3, 'dbo.RH10_Postulantes'),
+-- (4, 'dbo.PR20_SeguimientoCAB')
+-- )t(item, tabla)
+
+select*from dbo.masterTablas
+
+go
+if exists(select 1 from sys.sysobjects where id=object_id('dbo.usp_listar_tablas','p'))
+drop procedure dbo.usp_listar_tablas
+go
+create procedure dbo.usp_listar_tablas
 @tablas varchar(500)
-='dbo.PR20_SeguimientoCAB,dbo.RH10_Postulantes'
--- as
--- begin
+as
+begin
 set nocount on
 create table #tmp541yz_param(
     orden int identity,
     tablas varchar(200)
 )
+insert into #tmp541yz_param
+select tt.n.value('.','varchar(max)')
+from(select cast(concat('<x>', replace(@tablas, ',', '</x><x>'),'</x>') as xml) val)t
+cross apply t.val.nodes('/x')tt(n)
 
-select @tablas =
-concat('select*from(values(''', replace(@tablas, ',','''),('''), '''))t(a)')
-insert into #tmp541yz_param exec(@tablas)
-
-select t.item, t.tabla, tt.orden into #tmp541y_tablas from(values
-(1, 'dbo.asignar_vehiculo_unidad'),
-(2, 'dbo.vehiculo'),
-(3, 'dbo.RH10_Postulantes'),
-(4, 'dbo.PR20_SeguimientoCAB')
-)t(item, tabla) cross apply #tmp541yz_param tt
-where t.tabla = tt.tablas
+select t.item, t.tabla, tt.orden into #tmp541y_tablas
+from dbo.masterTablas t cross apply #tmp541yz_param tt where t.tabla = tt.tablas
 
 select orden, item, c.column_id, tabla, c.name,
 case when not c.collation_name is null then c.max_length end length,
@@ -38,23 +53,25 @@ where t.name = parsename(tabla, 1)and t.schema_id = schema_id(parsename(tabla, 2
 and t.object_id = c.object_id
 order by orden, c.column_id
 
--- end
--- go
+end
+go
 
 
--- declare @tmp001_tablas table(
--- item int,
--- column_id int,
--- tabla varchar(300),
--- name varchar(300),
--- length int,
--- is_nullable int,
--- is_identity int,
--- default_object_id int,
--- is_primary_key int,
--- is_unique_constraint int)
--- insert into @tmp001_tablas exec dbo.usp_listar_tablas
--- 'dbo.PR20_SeguimientoCAB,dbo.RH10_Postulantes'
+declare @tmp001_tablas table(
+orden int,
+item int,
+column_id int,
+tabla varchar(300),
+name varchar(300),
+length int,
+is_nullable int,
+is_identity int,
+default_object_id int,
+is_primary_key int,
+is_unique_constraint int)
+insert into @tmp001_tablas
+exec dbo.usp_listar_tablas
+'dbo.ASIGNAR_VEHICULO_UNIDAD,dbo.VEHICULO'
 
 
--- select*from @tmp001_tablas
+select*from @tmp001_tablas
