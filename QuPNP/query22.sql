@@ -1,4 +1,5 @@
-
+-- NOTA: CREACION DE MENUS DE TRANSPORTE:
+-- =====================================
 select*from dbo.menu
 
 select*from dbo.menuTransportes

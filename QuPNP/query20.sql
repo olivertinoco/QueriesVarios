@@ -79,8 +79,8 @@ from(select*from @tabla where campo is null)t,
     select*from(values('|','*','~'))t(sepCamp,sepSubcamp,sepReg)
 )
 insert into @sqlResult
-select stuff((select t, tt.item, '.', tt.column_id, s, tt.length, s,
-isnull(t.req, tt.is_nullable) , s, t.param
+select stuff((select t, tt.item, '.', tt.column_id, s,
+isnull(t.req, tt.is_nullable) , s, tt.length, s, t.param
 from(select item, tabla, campo, req, param
 from @tabla where not try_cast(item as int) is null)t
 cross apply @tmp001_tablas tt

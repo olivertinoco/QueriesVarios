@@ -1,4 +1,4 @@
--- NOTA: ESTO ES LA DESCRIPCION DE CADA CAMPO DE UNA TABLA
+-- NOTA: ESTO ES LA DESCRIPCION CAMPO DE UNA TABLA
 -- =======================================================
 set rowcount 10
 

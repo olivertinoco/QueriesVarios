@@ -1,3 +1,5 @@
+-- NOTA: A SOLICITUD DE EDI
+-- ========================
 if exists(select 1 from sys.sysobjects where id=object_id('dbo.usp_listar_ASIGNAR_VEHICULO_UNIDAD_01','p'))
 drop procedure dbo.usp_listar_ASIGNAR_VEHICULO_UNIDAD_01
 go
