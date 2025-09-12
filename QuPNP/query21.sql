@@ -56,7 +56,8 @@ order by orden, c.column_id
 end
 go
 
-
+-- create type tabla_generico
+--
 declare @tmp001_tablas table(
 orden int,
 item int,

@@ -16,8 +16,8 @@ Id TipoDotGD|GlnxDia|GlnxMes|Observacion~100|100|100|100|100|100|100|100|100' ca
 )
 ,tmp002_cab as(
     select cab =
-'a|b|c|Id_Prog|Id_Vehi|Placa_Interna|Placa_Rodaje|TipoRegistro|Est Vehiculo|Mes|Anio|\
-CodRev|Unidad|Maestranza|TipoVehiculo|TipoColor|TipoCombustible|TipoOctanaje|\
+'a|b|c|Id_Prog|Id_Vehi|Placa_Interna|Placa_Rodaje|TipoRegistro|Est Vehiculo|Anio|Mes|\
+Unidad|Maestranza|TipoVehiculo|TipoColor|TipoCombustible|TipoOctanaje|\
 TipoProcedencia|Cilindrada|Nro Motor|Serie|Kilometraje|EstadoOpe|EstadoOdometro|\
 Fec_Operatividad|Mot. Inopera|TipoFuncion|Grifo|Certificado|Fec_TerminoSOAT|\
 CIP_Conductor|Grado_Conductor|CIP_OperadorLR|Grado_OperadorLR~\
@@ -58,14 +58,14 @@ CIP_Conductor|Grado_Conductor|CIP_OperadorLR|Grado_OperadorLR~\
     select concat(i, cab, (select r,
     t.Id_TipoRegistro, t, t.Id_TipoFuncion, t, t.Id_TipoVehiculo, t,
     Id_ProgVehiculo, t, Id_Vehiculo, t, Placa_Interna, t,
-    Placa_Rodaje, t, tr.DescripcionL, t, isnull(te.DescripcionL, '-'), t, Mes, t, Anio, t, CodRev, t,
+    Placa_Rodaje, t, tr.DescripcionL, t, isnull(te.DescripcionL, '-'), t, Anio, t, Mes, t,
     Id_Unidad, t, isnull(tm.DescripcionL, '-'), t, isnull(tv.DescripcionL, '-'), t,
     isnull(tc.DescripcionL, '-'), t, isnull(tco.DescripcionL, '-'), t, isnull(toc.DescripcionL, '-'), t,
     isnull(tp.DescripcionL, '-'), t, Cilindrada, t, Nro_Motor, t, Nro_Serie, t, isnull(Kilometraje, '-'), t,
     isnull(tope.DescripcionL, '-'), t, isnull(odo.DescripcionL, '-'), t, convert(varchar, Fec_Operatividad, 23), t,
     isnull(tino.DescripcionL, '-'), t, isnull(fn.DescripcionL, '-'), t, isnull(Id_Grifo,'-'), t, Nro_Certificado, t,
     convert(varchar, Fec_TerminoSOAT, 23), t, CIP_Conductor, t, isnull(tg.DescripcionL, '-'), t,
-    CIP_OperadorLR, t, Grado_OperadorLR
+    CIP_OficialLR, t, Grado_OficialLR
     from dbo.PROG_VEHICULO t cross apply tipo_registro tr cross apply dbo.tipo_funcion fn
     outer apply(select*from dbo.tipo_estado_vehiculo te where te.Id_TipoEstadoVehiculo = t.Id_TipoEstadoVehiculo )te
     outer apply(select*from dbo.tipo_maestranza tm where tm.Id_TipoMaestranza = t.Id_TipoMaestranza)tm
@@ -110,3 +110,43 @@ exec dbo.usp_listaDotacionCombustible
 -- order by column_id
 -- for xml path, type).value('.','varchar(max)'))
 -- select(@data)
+
+
+
+return
+
+-- =============================================
+-- NOTA: TABLA DE EDI PARA PASAR A PROG_DOTACION
+-- =============================================
+set rowcount 0
+
+select top 0
+cast(null as int) codigo into #tmp001_salida
+
+;with tmp001_periodo(mes, anno) as(
+    select right(100 + month(dateadd(mm, 1, getdate())), 2), year(dateadd(mm, 1, getdate()))
+)
+insert into dbo.PROG_VEHICULO(
+Id_ProgLR, Id_Vehiculo, Anio, Mes, Placa_Interna, Placa_Rodaje, Id_Unidad, Id_TipoRegistro,
+Id_TipoEstadoVehiculo, Id_TipoMaestranza, Id_TipoVehiculo, Id_TipoColor, Id_TipoCombustible, Id_TipoOctanaje,
+Id_TipoProcedencia, Cilindrada, Nro_Motor, Nro_Serie,
+Id_TipoEstadoOpeVehiculo, Id_TipoEstadoOpeOdometro, Fec_Operatividad, Kilometraje, Id_TipoMotivoInoperatividad,
+Id_TipoFuncion, Id_Grifo, Id_Certificado, Fec_TerminoSOAT, CIP_Conductor,
+Grado_Conductor, CIP_OficialLR, Grado_OficialLR, Flag, UsuarioI, FechaI, Activo, Estado)
+
+output inserted.Id_ProgLR into #tmp001_salida
+select o.IdOperatividad, v.id_vehiculo, o.Ano, o.Mes, v.placa_interna, v.placa_rodaje, o.IdUnidadOperativdad, o.FlatAfectacion,
+oo.Id_TipoEstadoVehiculo, oo.Id_TipoMaestranza, v.Id_TipoVehiculo, v.Id_TipoColor, left(v.Id_TipoCombustible,5), v.Id_TipoOctanaje,
+g.Id_TipoProcedencia, left(v.Cilindrada,5), left(v.Nro_Motor,30), left(v.Nro_Serie,35),
+isnull(o.IdTipoEstadoOpeVehiculo,''), isnull(o.IdTipoEstadoOpeOdometro, 0), o.FchOperativida, o.Kilometraje, oo.IdTipoMotivoInoperatividad,
+v.Id_TipoFuncion, null, o.IdCertificado, o.FcterminoSoat, o.CipConductor,
+isnull(m1.IdGrado,''), isnull(o.CipAfectado, ''), isnull(m2.IdGrado,''),  1, 'parametro sp', getdate(), 1, 1
+from dbo.OPERATIVIDAD o cross apply dbo.vehiculo v cross apply tmp001_periodo p
+outer apply(select*from dbo.grupo_bien g where g.id_grupobien = v.id_grupobien)g
+outer apply(select*from dbo.operatividad_vehiculo oo where oo.id_vehiculo = v.id_vehiculo)oo
+outer apply(select*from dbo.masterPNP m1 where m1.cip = o.CipConductor and isnull(o.CipConductor, '') != '')m1
+outer apply(select*from dbo.masterPNP m2 where m2.cip = o.CipAfectado and isnull(o.CipAfectado, '') != '')m2
+where o.Ano = p.anno and o.Mes = cast(p.mes as int) and o.estado = 1 and o.IdVehiculo = v.id_vehiculo and o.PlacaInterna = v.Placa_Interna
+
+update t set tt.estado = 2, tt.UsuarioComb = 'parametro sp', tt.FchaRegComb = getdate()
+from #tmp001_salida t, dbo.OPERATIVIDAD tt where t.codigo = tt.IdOperatividad
