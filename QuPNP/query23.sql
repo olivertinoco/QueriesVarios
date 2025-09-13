@@ -17,10 +17,10 @@ insert into #tmp001_param exec(@data)
 ;with tmp001_sep(t,r) as(
     select*from(values('|','~'))t(sepCamp,sepReg)
 )
-select concat(1457,(select r, id_menu, t, descripcion, t, data_router
+select concat(p.usuario,(select r, id_menu, t, descripcion, t, data_router
 from dbo.menuTransportes order by id_menu
 for xml path, type).value('.','varchar(max)')) dato
-from tmp001_sep
+from tmp001_sep, #tmp001_param p
 
 end try
 begin catch
@@ -29,4 +29,4 @@ end catch
 end
 go
 
-exec dbo.usp_loginXmenusTransporte '1212|545'
+exec dbo.usp_loginXmenusTransporte 'maria|545'
