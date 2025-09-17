@@ -34,6 +34,8 @@ end
 go
 
 exec dbo.usp_listaGeometrias
+return
+
 
 select*from dbo.geojson_redvialdepartamental
 

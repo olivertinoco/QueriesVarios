@@ -63,7 +63,7 @@ CIP_Conductor|Grado_Conductor|CIP_OperadorLR|Grado_OperadorLR~\
     isnull(tc.DescripcionL, '-'), t, isnull(tco.DescripcionL, '-'), t, isnull(toc.DescripcionL, '-'), t,
     isnull(tp.DescripcionL, '-'), t, Cilindrada, t, Nro_Motor, t, Nro_Serie, t, isnull(Kilometraje, '-'), t,
     isnull(tope.DescripcionL, '-'), t, isnull(odo.DescripcionL, '-'), t, convert(varchar, Fec_Operatividad, 23), t,
-    isnull(tino.DescripcionL, '-'), t, isnull(fn.DescripcionL, '-'), t, isnull(Id_Grifo,'-'), t, Nro_Certificado, t,
+    isnull(tino.DescripcionL, '-'), t, isnull(fn.DescripcionL, '-'), t, isnull(Id_Grifo,'-'), t, cer.NroCertificado, t,
     convert(varchar, Fec_TerminoSOAT, 23), t, CIP_Conductor, t, isnull(tg.DescripcionL, '-'), t,
     CIP_OficialLR, t, Grado_OficialLR
     from dbo.PROG_VEHICULO t cross apply tipo_registro tr cross apply dbo.tipo_funcion fn
@@ -78,6 +78,7 @@ CIP_Conductor|Grado_Conductor|CIP_OperadorLR|Grado_OperadorLR~\
     outer apply(select*from dbo.tipo_estado_op_odometro odo where odo.IdEstadoOperatividadOdometro = t.Id_TipoEstadoOpeOdometro)odo
     outer apply(select*from dbo.tipo_inoperatividad tino where tino.Id_TipoInoperatividad = t.Id_TipoMotivoInoperatividad)tino
     outer apply(select*from dbo.tipo_grado tg where tg.Id_TipoGrado = t.Grado_Conductor)tg
+    outer apply(select*from dbo.certificado cer where cer.IdCertificado = t.Id_Certificado and cer.IdVehiculo = t.Id_Vehiculo)cer
     where t.id_tipoFuncion != 7 and t.Id_TipoRegistro = tr.Id_TipoRegistro and t.Id_TipoFuncion = fn.Id_TipoFuncion
     order by t.Id_Vehiculo
     for xml path, type).value('.','varchar(max)'))
