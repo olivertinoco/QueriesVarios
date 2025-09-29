@@ -1,3 +1,4 @@
+-- NOTA: CONSUMO DEL GENERICO
 if exists(select 1 from sys.sysobjects where id=object_id('dbo.usp_crud_grupo_bien','p'))
 drop procedure dbo.usp_crud_grupo_bien
 go
@@ -17,92 +18,92 @@ exec dbo.usp_listar_tablas 'dbo.grupo_bien'
     select*from(values('|','~','^'))t(sepCampo,sepReg,sepLst)
 )
 ,hlp001_tipo_registro(dato) as(
-    select stuff((select r, id_tipoRegistro, t, rtrim(DescripcionL) from dbo.tipo_registro
+    select concat(i, 1, (select r, id_tipoRegistro, t, rtrim(DescripcionL) from dbo.tipo_registro
     where activo = 1 and estado = 1 order by DescripcionL
-    for xml path, type).value('.','varchar(max)'), 1,1, i)
+    for xml path, type).value('.','varchar(max)'))
     from tmp001_sep
 )
 ,hlp001_tipo_rubro(dato)as(
-    select stuff((select r, id_tipoRubro, t, rtrim(DescripcionL) from dbo.tipo_rubro
+    select concat(i, 2, (select r, id_tipoRubro, t, rtrim(DescripcionL) from dbo.tipo_rubro
     where activo = 1 and estado = 1 order by DescripcionL
-    for xml path, type).value('.','varchar(max)'), 1,1, i)
+    for xml path, type).value('.','varchar(max)'))
     from tmp001_sep
 )
 ,hlp001_tipo_estado_registro(dato)as(
-    select stuff((select r, id_tipo_estadoRegistro, t, rtrim(DescripcionL) from dbo.tipo_estado_registro
+    select concat(i, 3, (select r, id_tipo_estadoRegistro, t, rtrim(DescripcionL) from dbo.tipo_estado_registro
     where activo = 1 and estado = 1 order by DescripcionL
-    for xml path, type).value('.','varchar(max)'), 1,1, i)
+    for xml path, type).value('.','varchar(max)'))
     from tmp001_sep
 )
 ,hlp001_tipo_entidad(dato)as(
-    select stuff((select r, id_tipoEntidad, t, rtrim(DescripcionL) from dbo.tipo_entidad
+    select concat(i, 4, (select r, id_tipoEntidad, t, rtrim(DescripcionL) from dbo.tipo_entidad
     where activo = 1 and estado = 1 order by DescripcionL
-    for xml path, type).value('.','varchar(max)'), 1,1, i)
+    for xml path, type).value('.','varchar(max)'))
     from tmp001_sep
 )
 ,hlp001_tipo_forma_adquisicion(dato)as(
-    select stuff((select r, id_tipoFormaAdquisicion, t, rtrim(DescripcionL) from dbo.tipo_forma_adquisicion
+    select concat(i, 5, (select r, id_tipoFormaAdquisicion, t, rtrim(DescripcionL) from dbo.tipo_forma_adquisicion
     where activo = 1 and estado = 1 order by DescripcionL
-    for xml path, type).value('.','varchar(max)'), 1,1, i)
+    for xml path, type).value('.','varchar(max)'))
     from tmp001_sep
 )
 ,hlp001_tipo_procedencia(dato)as(
-    select stuff((select r, id_tipoProcedencia, t, rtrim(DescripcionL) from dbo.tipo_procedencia
+    select concat(i, 6, (select r, id_tipoProcedencia, t, rtrim(DescripcionL) from dbo.tipo_procedencia
     where activo = 1 and estado = 1 order by DescripcionL
-    for xml path, type).value('.','varchar(max)'), 1,1, i)
+    for xml path, type).value('.','varchar(max)'))
     from tmp001_sep
 )
 ,hlp001_tipo_unidad_medida(dato)as(
-    select stuff((select r, id_tipoUnidadMedida, t, rtrim(DescripcionL) from dbo.tipo_unidad_medida
+    select concat(i, 7, (select r, id_tipoUnidadMedida, t, rtrim(DescripcionL) from dbo.tipo_unidad_medida
     where activo = 1 and estado = 1 order by DescripcionL
-    for xml path, type).value('.','varchar(max)'), 1,1, i)
+    for xml path, type).value('.','varchar(max)'))
     from tmp001_sep
 )
 ,hlp001_tipo_documento(dato)as(
-    select stuff((select r, id_tipoDocumento, t, rtrim(DescripcionL) from dbo.tipo_documento
+    select concat(i, 8, (select r, id_tipoDocumento, t, rtrim(DescripcionL) from dbo.tipo_documento
     where activo = 1 and estado = 1 order by DescripcionL
-    for xml path, type).value('.','varchar(max)'), 1,1, i)
-    from tmp001_sep
-)
-,hlp001_tipo_grupo_bien(dato)as(
-    select stuff((select r, Id_TipoGrupoBien, t, rtrim(DescripcionL) from dbo.tipo_grupo_bien
-    where estado = 1 order by DescripcionL
-    for xml path, type).value('.','varchar(max)'), 1,1, i)
+    for xml path, type).value('.','varchar(max)'))
     from tmp001_sep
 )
 ,hlp001_tipo_donante(dato)as(
-    select stuff((select r, id_tipoDonante, t, rtrim(DescripcionL) from dbo.tipo_donante
+    select concat(i, 10, (select r, id_tipoDonante, t, rtrim(DescripcionL) from dbo.tipo_donante
     where activo = 1 and estado = 1 order by DescripcionL
-    for xml path, type).value('.','varchar(max)'), 1,1, i)
+    for xml path, type).value('.','varchar(max)'))
+    from tmp001_sep
+)
+,hlp001_tipo_grupo_bien(dato)as(
+    select concat(i, 9, (select r, Id_TipoGrupoBien, t, rtrim(DescripcionL) from dbo.tipo_grupo_bien
+    where estado = 1 order by DescripcionL
+    for xml path, type).value('.','varchar(max)'))
     from tmp001_sep
 )
 ,hlp001_catalogo_bien(dato)as(
-    select stuff((select r, Id_TipoGrupoBien, t, Id_CatalogoBien, t, rtrim(Descripcion), t, Cod_Catalogo_Bien
+    select concat(i, 11, (select r, Id_TipoGrupoBien, t, Id_CatalogoBien, t, rtrim(Descripcion), t, Cod_Catalogo_Bien
     from dbo.catalogo_bien where estado = 1 order by Descripcion
-    for xml path, type).value('.','varchar(max)'), 1,1, i)
+    for xml path, type).value('.','varchar(max)'))
     from tmp001_sep
 )
 ,tmp001_meta(dato)as(
 select*from dbo.udf_general_metadata(
-'t.Id_GrupoBien..100,
-t.Id_TipoRegistro..111,
-t.Id_TipoRubro..111,
-t.Id_CatalogoBien..150,
-t.Nombre_Bien..101,
-t.Cod_Catalogo_Bien..101*1,
-t.Id_TipoProcedencia..111,
-t.Id_Tipo_EstadoRegistro..111,
-t.Id_TipoEntidad..111,
-t.CantidadTotal..101,
-t.Id_TipoDonante..150,
-t.ResolucionDonacion..101,
-t.Id_TipoUnidadMedida..150,
-t.Id_TipoFormaAdquisicion..111,
-t.Id_TipoDocumento..150,
-t.Nro_Documento..101,
-t.Fec_Documento..102,
-t.Activo..112,
-t.Estado..112',
+'t.Id_GrupoBien..*100,
+t.Id_TipoRegistro..*111*1*Tipo Regristro:,
+t.Id_TipoRubro.0.*111*2*Tipo Rubro:,
+t.Id_CatalogoBien..*150*11*Seleccione Catalogo:,
+t.Nombre_Bien..20*101**Nombre Bien:,
+t.Cod_Catalogo_Bien..*101**Codigo Catalogo:*1,
+t.Id_TipoProcedencia..*111*6*Tipo Procedencia,
+t.Id_Tipo_EstadoRegistro..*111*3*Tipo Estado Registro:,
+t.Id_TipoEntidad..*111*4*Tipo Entidad:,
+t.CantidadTotal..*101**Cantidad Total:,
+t.Id_TipoDonante..*150*10*Seleccion Tipo Donante:,
+t.ResolucionDonacion..*101**Resolucion Donante:,
+t.Id_TipoUnidadMedida..*150*7*Seleccion Unidad Medida:,
+t.Id_TipoFormaAdquisicion..*111*5*Tipo Forma Adquisicion:,
+t.Id_TipoDocumento..*150*8*Seleccion Tipo Documento:,
+t.Nro_Documento..*101**Nro Documento:,
+t.Fec_Documento..*102**Fecha Documento:,
+t.Activo..*103**Check Activo:,
+t.Estado..*103**Check Estado:',
 't.dbo.grupo_bien',
 @Utabla)
 )
@@ -157,6 +158,9 @@ declare @Utabla tabla_generico
 insert into @Utabla
 exec dbo.usp_listar_tablas 'dbo.grupo_bien'
 select*from @Utabla
+
+
+select*from mastertable('dbo.grupo_bien')
 
 set rowcount 10
 select*from dbo.grupo_bien
