@@ -1,5 +1,9 @@
 -- PARA EL GENERICO:
 -- =================
+-- drop function dbo.udf_general_metadata
+-- go
+-- drop type tabla_generico
+-- go
 -- create type tabla_generico as table(
 -- orden int,
 -- item int,
@@ -11,7 +15,8 @@
 -- is_identity int,
 -- default_object_id int,
 -- is_primary_key int,
--- is_unique_constraint int)
+-- is_unique_constraint int,
+-- tipo_dato int)
 -- go
 
 -- NOTA: EN ESTE PUNTO COMENZAR A PONER VALIDACIONES DEL FRONTEND
@@ -80,7 +85,7 @@ from(select*from @tabla where campo is null)t,
 )
 insert into @sqlResult
 select stuff((select t, tt.item, '.', tt.column_id, s,
-isnull(t.req, tt.is_nullable) , s, tt.length, s, t.param
+isnull(t.req, tt.is_nullable) , s, tt.tipo_dato, s, tt.length, s, t.param
 from(select item, tabla, campo, req, param
 from @tabla where not try_cast(item as int) is null)t
 cross apply @tmp001_tablas tt
@@ -97,29 +102,29 @@ go
 -- NOTA: CODIGO QUE HAY QUE ACOPLAR EN LOS SPs DE CADA UNO PARA LA METADATA
 -- ========================================================================
 
+
+
 declare @tablas tabla_generico
 insert into @tablas exec dbo.usp_listar_tablas
 'dbo.ASIGNAR_VEHICULO_UNIDAD,dbo.VEHICULO'
 
 select dato from dbo.udf_general_metadata(
-'t.Id_AsignarVehiculoUnidad..100,
-t.Placa_Interna..101,
-t.Id_vehiculo.0.100,
-t.Id_UnidadDestino..111,
-tt.Placa_Rodaje..101,
-tt.Id_TipoVehiculo..111,
-tt.Id_TipoMarca.0.111,
-tt.Id_TipoModelo..111,
-tt.Anio_Modelo..101,
-tt.Id_TipoColor..111,
-tt.Id_TipoCombustible..111,
-tt.Cilindrada..101,
-tt.Nro_Motor..101,
-tt.Nro_Serie..101',
+'t.Id_AsignarVehiculoUnidad..*100,
+t.Placa_Interna..*101,
+t.Id_vehiculo.0.*100,
+t.Id_UnidadDestino..*111,
+tt.Placa_Rodaje..*101,
+tt.Id_TipoVehiculo..*111,
+tt.Id_TipoMarca.0.*111,
+tt.Id_TipoModelo..*111,
+tt.Anio_Modelo..*101,
+tt.Id_TipoColor..*111,
+tt.Id_TipoCombustible..*111,
+tt.Cilindrada..*101,
+tt.Nro_Motor..*101,
+tt.Nro_Serie..*101',
 't.dbo.ASIGNAR_VEHICULO_UNIDAD,tt.dbo.VEHICULO',
 @tablas)
 
-select*from @tablas
-
-
 select*from dbo.masterTablas
+select*from @tablas

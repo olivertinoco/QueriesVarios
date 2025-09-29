@@ -27,7 +27,6 @@ return
 -- where t.Id_Vehiculo = tt.Id_Vehiculo and t.Id_TipoFuncion = ttt.Id_TipoFuncion
 -- order by tt.Id_TipoEstadoVehiculo
 
-
 select*from dbo.tipo_estado_operatividad
 
 return

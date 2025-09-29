@@ -1,4 +1,9 @@
-
+if exists(select 1 from sys.sysobjects where id=object_id('dbo.usp_listaOperatividadVehiculo', 'p'))
+drop procedure dbo.usp_listaOperatividadVehiculo
+go
+create procedure dbo.usp_listaOperatividadVehiculo
+as
+begin
 set nocount on
 set language english
 
@@ -13,11 +18,30 @@ cilindrada|motor|serie|desc operatividad|\
 desc odometro|fech operatividad|Kilometraje|desc inoperatividad|\
 desc funcion|certificado|fech term SOAT|cip conductor|\
 desc grado cond|cip afectado|desc grado afect|unidad', r,
-'10|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100')
+'100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|100|1000')
 from tmp001_sep
 )
 ,tmp001_periodo(mes, anno) as(
     select right(100 + month(dateadd(mm, 0, getdate())), 2), year(dateadd(mm, 1, getdate()))
+)
+,tmp001_tipo_funcion(data) as(
+    select stuff((select r, Id_TipoFuncion, t, DescripcionL from dbo.tipo_funcion where estado = 1 and activo = 1
+    order by DescripcionL
+    for xml path, type).value('.','varchar(max)'),1,1,i)
+    from tmp001_sep
+)
+,tmp001_tipo_registro(data) as(
+    select stuff((select r, Id_TipoRegistro, t, DescripcionL from dbo.tipo_registro where estado = 1 and activo = 1
+    order by DescripcionL
+    for xml path, type).value('.','varchar(max)'),1,1,i)
+    from tmp001_sep
+)
+,tmp001_tipo_vehiculo(data) as(
+    select stuff((select r, Id_TipoVehiculo, t, DescripcionL from dbo.tipo_vehiculo
+    where estado = 1 and activo = 1 and Id_TipoVehiculo != 0
+    order by DescripcionL
+    for xml path, type).value('.','varchar(max)'),1,1,i)
+    from tmp001_sep
 )
 select concat(c.cab, (select r,
 o.IdOperatividad, t, o.Ano, t, o.Mes, t, v.id_vehiculo, t, v.placa_interna, t, v.placa_rodaje, t,
@@ -49,10 +73,23 @@ outer apply(select*from dbo.tipo_grado tg1 where tg1.Id_TipoGrado = m1.IdGrado)t
 outer apply(select*from dbo.tipo_grado tg2 where tg2.Id_TipoGrado = m2.IdGrado)tg2
 where o.Ano = p.anno and o.Mes = cast(p.mes as int) and o.estado = 1
 and o.IdVehiculo = v.id_vehiculo and o.PlacaInterna = v.Placa_Interna
-for xml path, type).value('.','varchar(max)'))
-from tmp001_sep, tmp001_cab c
+for xml path, type).value('.','varchar(max)'),
+t1.data, t2.data, t3.data
+)
+from tmp001_sep, tmp001_cab c,
+tmp001_tipo_funcion t1,
+tmp001_tipo_registro t2,
+tmp001_tipo_vehiculo t3
+
+end
+go
+
+exec dbo.usp_listaOperatividadVehiculo
 
 
+
+-- alter table dbo.PROG_VEHICULO add flag_entrega bit not null default(0)
+-- select*from mastertable('dbo.PROG_VEHICULO')
 
 
 return
