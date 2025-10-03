@@ -16,7 +16,9 @@
 -- default_object_id int,
 -- is_primary_key int,
 -- is_unique_constraint int,
--- tipo_dato int)
+-- tipo_dato int,
+-- audit int,
+-- esFecha int)
 -- go
 
 -- NOTA: EN ESTE PUNTO COMENZAR A PONER VALIDACIONES DEL FRONTEND

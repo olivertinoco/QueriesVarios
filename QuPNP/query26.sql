@@ -17,6 +17,15 @@ exec dbo.usp_listar_tablas 'dbo.grupo_bien'
 ;with tmp001_sep(t,r,i)as(
     select*from(values('|','~','^'))t(sepCampo,sepReg,sepLst)
 )
+,tmp001_cab(cab)as(
+    select '~idCata|idGrupo|Codigo|Descripcion~10|10|100|400'
+)
+,tmp002_cab(cab)as(
+    select '~idDonante|Descripcion Donante~10|350'
+)
+,tmp003_cab(cab)as(
+    select '~idDoc|Descripcion Documento~10|350'
+)
 ,hlp001_tipo_registro(dato) as(
     select concat(i, 1, (select r, id_tipoRegistro, t, rtrim(DescripcionL) from dbo.tipo_registro
     where activo = 1 and estado = 1 order by DescripcionL
@@ -60,16 +69,16 @@ exec dbo.usp_listar_tablas 'dbo.grupo_bien'
     from tmp001_sep
 )
 ,hlp001_tipo_documento(dato)as(
-    select concat(i, 8, (select r, id_tipoDocumento, t, rtrim(DescripcionL) from dbo.tipo_documento
+    select concat(i, 8, c.cab, (select r, id_tipoDocumento, t, rtrim(DescripcionL) from dbo.tipo_documento
     where activo = 1 and estado = 1 order by DescripcionL
     for xml path, type).value('.','varchar(max)'))
-    from tmp001_sep
+    from tmp001_sep, tmp003_cab c
 )
 ,hlp001_tipo_donante(dato)as(
-    select concat(i, 10, (select r, id_tipoDonante, t, rtrim(DescripcionL) from dbo.tipo_donante
+    select concat(i, 10, c.cab, (select r, id_tipoDonante, t, rtrim(DescripcionL) from dbo.tipo_donante
     where activo = 1 and estado = 1 order by DescripcionL
     for xml path, type).value('.','varchar(max)'))
-    from tmp001_sep
+    from tmp001_sep, tmp002_cab c
 )
 ,hlp001_tipo_grupo_bien(dato)as(
     select concat(i, 9, (select r, Id_TipoGrupoBien, t, rtrim(DescripcionL) from dbo.tipo_grupo_bien
@@ -78,30 +87,31 @@ exec dbo.usp_listar_tablas 'dbo.grupo_bien'
     from tmp001_sep
 )
 ,hlp001_catalogo_bien(dato)as(
-    select concat(i, 11, (select r, Id_TipoGrupoBien, t, Id_CatalogoBien, t, rtrim(Descripcion), t, Cod_Catalogo_Bien
+    select concat(i, 11, c.cab, (select r, Id_CatalogoBien, t, Id_TipoGrupoBien, t, Cod_Catalogo_Bien, t, rtrim(Descripcion)
     from dbo.catalogo_bien where estado = 1 order by Descripcion
     for xml path, type).value('.','varchar(max)'))
-    from tmp001_sep
+    from tmp001_sep, tmp001_cab c
 )
 ,tmp001_meta(dato)as(
-select*from dbo.udf_general_metadata(
+select concat(dato,'|0.0*****111*9*Grupo Bien:')
+from dbo.udf_general_metadata(
 't.Id_GrupoBien..*100,
 t.Id_TipoRegistro..*111*1*Tipo Regristro:,
 t.Id_TipoRubro.0.*111*2*Tipo Rubro:,
-t.Id_CatalogoBien..*150*11*Seleccione Catalogo:,
+t.Id_CatalogoBien..*151*11*Seleccione Catalogo del Bien:**1*2*800,
 t.Nombre_Bien..20*101**Nombre Bien:,
 t.Cod_Catalogo_Bien..*101**Codigo Catalogo:*1,
 t.Id_TipoProcedencia..*111*6*Tipo Procedencia,
-t.Id_Tipo_EstadoRegistro..*111*3*Tipo Estado Registro:,
+t.Id_Tipo_EstadoRegistro.0.*111*3*Tipo Estado Registro:,
 t.Id_TipoEntidad..*111*4*Tipo Entidad:,
-t.CantidadTotal..*101**Cantidad Total:,
-t.Id_TipoDonante..*150*10*Seleccion Tipo Donante:,
-t.ResolucionDonacion..*101**Resolucion Donante:,
-t.Id_TipoUnidadMedida..*150*7*Seleccion Unidad Medida:,
+t.CantidadTotal.0.*101**Cantidad Total:,
+t.Id_TipoDonante..*151*10*Seleccion Tipo Donante:**1,
+t.ResolucionDonacion.0.*101**Resolucion Donante:,
+t.Id_TipoUnidadMedida..*111*7*Seleccion Unidad Medida:,
 t.Id_TipoFormaAdquisicion..*111*5*Tipo Forma Adquisicion:,
-t.Id_TipoDocumento..*150*8*Seleccion Tipo Documento:,
+t.Id_TipoDocumento..*151*8*Seleccion Tipo Documento:**1,
 t.Nro_Documento..*101**Nro Documento:,
-t.Fec_Documento..*102**Fecha Documento:,
+t.Fec_Documento.0.*102**Fecha Documento:,
 t.Activo..*103**Check Activo:,
 t.Estado..*103**Check Estado:',
 't.dbo.grupo_bien',
@@ -126,7 +136,7 @@ t.Id_TipoDocumento, t,
 t.Nro_Documento, t,
 convert(varchar, t.Fec_Documento, 23), t,
 t.Activo, t,
-t.Estado
+t.Estado, t, null
 from dbo.grupo_bien t where t.Id_GrupoBien = @data
 for xml path, type).value('.','varchar(max)'),1,1,''),
 m.dato, t1.dato, t2.dato, t3.dato, t4.dato, t5.dato, t6.dato,
@@ -151,16 +161,19 @@ end catch
 end
 go
 
-exec dbo.usp_crud_grupo_bien 146
+exec dbo.usp_crud_grupo_bien 0
 
 
-declare @Utabla tabla_generico
-insert into @Utabla
-exec dbo.usp_listar_tablas 'dbo.grupo_bien'
-select*from @Utabla
 
 
-select*from mastertable('dbo.grupo_bien')
 
-set rowcount 10
-select*from dbo.grupo_bien
+-- declare @Utabla tabla_generico
+-- insert into @Utabla
+-- exec dbo.usp_listar_tablas 'dbo.grupo_bien'
+-- select*from @Utabla
+
+
+-- select*from mastertable('dbo.grupo_bien')
+
+-- set rowcount 10
+-- select*from dbo.grupo_bien
