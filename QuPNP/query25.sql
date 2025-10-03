@@ -33,6 +33,7 @@ insert into #tmp001_registros exec(@tabla)
 select*from #tmp001_registros order by rows
 
 
+return
 set rowcount 10
 select*from dbo.grupo_bien
 

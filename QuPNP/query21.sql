@@ -3,7 +3,13 @@
 -- ESTO ES PARA CONSUMO TANTO DE IDA COMO DE REGRESO ES EL SP DE PIVOT
 -- EL GENERAL DE LA METADATA DE CADA TABLA U
 -- ===================================================================
-GO
+go
+-- create table dbo.masterAudit(
+--     campo varchar(100),
+--     esFecha int
+-- )
+-- insert into dbo.masterAudit values('UsuarioI', 0), ('FechaI', 1)
+go
 -- create table dbo.masterTablas(
 --     item int,
 --     tabla varchar(300)
@@ -18,6 +24,10 @@ GO
 -- )t(item, tabla)
 
 select*from dbo.masterTablas
+select*from dbo.masterAudit
+
+
+
 
 go
 if exists(select 1 from sys.sysobjects where id=object_id('dbo.usp_listar_tablas','p'))
@@ -47,13 +57,15 @@ from(values(1,'tinyint'),(1,'smallint'),(1,'int'),(1,'bigint'),(2,'float'),(2,'d
 select orden, item, c.column_id, tabla, c.name,
 case when not c.collation_name is null then c.max_length end length,
 nullif(c.is_nullable, 1) is_nullable, c.is_identity, c.default_object_id,
-i.is_primary_key, i.is_unique_constraint, yy.tipo_dato
+isnull(i.is_primary_key, 0) is_primary_key, isnull(i.is_unique_constraint, 0) is_unique_constraint,
+yy.tipo_dato, isnull(au.audi, 0) audi, isnull(au.esFecha, 0) esFecha
 from sys.tables t cross apply #tmp541y_tablas cross apply sys.columns c cross apply sys.types ty
 outer apply(select*from sys.index_columns ic
 where ic.object_id = t.object_id and ic.object_id = c.object_id and ic.index_column_id = c.column_id)ic
 outer apply(select*from sys.indexes i
 where i.object_id = t.object_id and i.object_id = ic.object_id and i.index_id = ic.index_id)i
 outer apply(select*from #tmp001_types yy where yy.nombre = ty.name)yy
+outer apply(select 1 audi, esFecha from dbo.masterAudit au where au.campo = c.name)au
 where t.name = parsename(tabla, 1)and t.schema_id = schema_id(parsename(tabla, 2))
 and t.object_id = c.object_id
 and c.system_type_id = ty.system_type_id and c.user_type_id = ty.user_type_id
@@ -77,7 +89,9 @@ is_identity int,
 default_object_id int,
 is_primary_key int,
 is_unique_constraint int,
-tipo_dato int)
+tipo_dato int,
+audit int,
+esFecha int)
 insert into @tmp001_tablas
 exec dbo.usp_listar_tablas
 'dbo.ASIGNAR_VEHICULO_UNIDAD,dbo.VEHICULO'
