@@ -1,6 +1,8 @@
 -- declare @data varchar(max) =
--- 'tret~146|1|1253|MARIa|3.1|3.8|3.10|3.12'
--- 'sda~|2|1|122312|ASSD|3.1|3.3|3.8|3.10|3.12'
+-- -- -- 'tret~146|1|1253|MARIA|3.1|3.8|3.10|3.12'
+-- -- -- 'sda~|2|1|122312|ASSD|3.1|3.3|3.8|3.10|3.12'
+-- 'rwe~146|2|3.1|3.2'
+
 
 go
 if exists(select 1 from sys.sysobjects where id=object_id('dbo.usp_crud_generico01','p'))
@@ -43,12 +45,24 @@ select row_number()over(order by (select 0))+999 item,
 t.name, t.is_identity, t.default_object_id, t.is_primary_key
 from @Utabla t where audit = 1 order by esFecha offset 0 rows)t
 
+
 ;with tmp001_dato as(
     select*from #tmp001_dato
 )
+,tmp001_tabla_out(dato)as(
+    select concat(stuff((select ',',name, ' varchar(50)' from #tmp001_dato
+    where is_primary_key = 1 order by orden1
+    for xml path, type).value('.','varchar(max)'),1,1,';create table #tmp001_salida('),')')
+)
+,tmp001_output(dato) as(
+    select concat(stuff((select ',inserted.',name from #tmp001_dato
+    where is_primary_key = 1 order by orden1
+    for xml path, type).value('.','varchar(max)'),1,1,'output '),
+    ' into #tmp001_salida; select*from #tmp001_salida')
+)
 ,tmp001_merge(dato) as(
     select concat(';merge into ', @tablas,
-    ' t using #tmp001_datos s on(www)when matched then update set xxx when not matched then insert(yyy)values(zzz);')
+    ' t using #tmp001_datos s on(www)when matched then update set xxx when not matched then insert(yyy)values(zzz) ')
 )
 ,tmp001_on(dato) as(
     select stuff((select ' and t.', name, '=s.', name
@@ -70,13 +84,16 @@ from @Utabla t where audit = 1 order by esFecha offset 0 rows)t
     from tmp001_dato where is_identity = 0 and default_object_id = 0 order by orden1
     for xml path, type).value('.','varchar(max)'),1,1,'')
 )
-select @merge =
+select @merge = concat(t5.dato,
 replace(replace(replace(replace(t.dato, 'www', t1.dato), 'xxx', t2.dato), 'yyy', t3.dato), 'zzz', t4.dato)
+,t6.dato)
 from tmp001_merge t,
 tmp001_on t1,
 tmp001_matched t2,
 tmp001_not_matched t3,
-tmp002_not_matched t4
+tmp002_not_matched t4,
+tmp001_tabla_out t5,
+tmp001_output t6
 
 select @tablas = concat('select ', stuff((select ',', case is_identity when 1 then 'cast(null as int)' end, name
 from #tmp001_dato order by orden1
@@ -97,8 +114,6 @@ from tmp001_cab c
 
 exec(@tablas + @merge)
 
-select 1
-
 end try
 begin catch
     select concat('error:', error_message())
@@ -109,9 +124,11 @@ go
 
 declare @data varchar(max) =
 -- 'tret~146|1|1253|MARIa|3.1|3.8|3.10|3.12'
-'sda~|2|1|122312|ASSD|3.1|3.3|3.8|3.10|3.12'
+-- 'sda~|2|1|122312|ASSD|3.1|3.3|3.8|3.10|3.12'
+'rwe~146|2|3.1|3.2'
 
 -- exec dbo.usp_crud_generico01 @data
 
+
+select *from dbo.grupo_bien where  Id_GrupoBien = 135
 select top 10 *from dbo.grupo_bien order by  Id_GrupoBien desc
--- -- 12819
