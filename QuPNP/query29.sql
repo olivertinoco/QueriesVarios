@@ -72,6 +72,41 @@ end catch
 end
 go
 
-exec dbo.usp_crud_search_grupo_bien 162
+-- exec dbo.usp_crud_search_grupo_bien 162
 
+
+
+select concat('t.', name, ', t,') from mastertable('dbo.vehiculo') order by column_id
+
+
+
+return
+select*from dbo.grupo_bien where Id_GrupoBien = 146
+
+
+select*from mastertable('CANTIDAD_VEHICULO')
+select*from mastertable('GRUPO_BIEN')
+
+select*from dbo.cantidad_vehiculo where Id_GrupoBien = 146
+
+select Id_TipoVehiculo, DescripcionL from dbo.tipo_vehiculo where activo = 1 and estado = 1 and Id_TipoVehiculo != 0
+select Id_TipoClaseVehiculo, DescripcionL from dbo.tipo_claseVehiculo where activo = 1 and estado = 1
+select Id_TipoClasificacionBien, DescripcionL from dbo.tipo_clasificacion_bien where activo = 1 and estado = 1
+
+
+
+
+
+
+
+return
+select*from sys.tables order by 1
+return
+
+
+select*from dbo.tipo_entidad
+select distinct Id_TipoEntidad from dbo.tipo_grupo_bien
+
+select *from dbo.tipo_grupo_bien order by DescripcionL
+-- where Id_TipoGrupoBien = 29
 select*from dbo.grupo_bien where Id_GrupoBien = 146

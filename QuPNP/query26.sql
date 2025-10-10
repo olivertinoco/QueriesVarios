@@ -45,8 +45,9 @@ exec dbo.usp_listar_tablas 'dbo.grupo_bien'
     from tmp001_sep
 )
 ,hlp001_tipo_entidad(dato)as(
-    select concat(i, 4, (select r, id_tipoEntidad, t, rtrim(DescripcionL) from dbo.tipo_entidad
-    where activo = 1 and estado = 1 order by DescripcionL
+    select concat(i, 4, (select r, id_tipoEntidad, t, rtrim(DescripcionL) from dbo.tipo_entidad t
+    outer apply(select*from(values(1),(6))tt(item) where tt.item = t.id_tipoEntidad)tt
+    where activo = 1 and estado = 1 order by tt.item desc, DescripcionL
     for xml path, type).value('.','varchar(max)'))
     from tmp001_sep
 )
@@ -93,27 +94,28 @@ exec dbo.usp_listar_tablas 'dbo.grupo_bien'
     from tmp001_sep, tmp001_cab c
 )
 ,tmp001_meta(dato)as(
-select concat(dato,'|0.0*****111*9*Grupo Bien:')
+-- select concat(dato,'|0.0*****111*9*Grupo Bien:')
+select*
 from dbo.udf_general_metadata(
 't.Id_GrupoBien..*100,
-t.Id_TipoRegistro..*111*1*Tipo Regristro:,
-t.Id_TipoRubro.0.*111*2*Tipo Rubro:,
-t.Id_CatalogoBien..*151*11*Seleccione Catalogo del Bien:**1*2*800,
-t.Nombre_Bien..20*101**Nombre Bien:,
-t.Cod_Catalogo_Bien..*101**Codigo Catalogo:*1,
-t.Id_TipoProcedencia..*111*6*Tipo Procedencia,
-t.Id_Tipo_EstadoRegistro.0.*111*3*Tipo Estado Registro:,
-t.Id_TipoEntidad..*111*4*Tipo Entidad:,
-t.CantidadTotal.0.*101**Cantidad Total:,
-t.Id_TipoDonante..*151*10*Seleccion Tipo Donante:**1,
+t.Id_TipoRegistro.0.*111*1*Regristro:,
+t.Id_TipoRubro.0.*111*2*Rubro:,
+t.Id_CatalogoBien.0.*151*11*Seleccione Catalogo del Bien:**1*2*800,
+t.Nombre_Bien..20*101**Nombre Bien:*1****1,
+t.Cod_Catalogo_Bien..*101**Codigo Catalogo:*1****1,
+t.Id_TipoProcedencia.0.*111*6*Procedencia,
+t.Id_Tipo_EstadoRegistro.0.*111*3*Estado Registro:,
+t.Id_TipoEntidad.0.*111*4*Entidad:,
+t.CantidadTotal..*101**Cantidad Total:*1,
+t.Id_TipoDonante.0.*151*10*Seleccion Donante:**1,
 t.ResolucionDonacion.0.*101**Resolucion Donante:,
-t.Id_TipoUnidadMedida..*111*7*Seleccion Unidad Medida:,
-t.Id_TipoFormaAdquisicion..*111*5*Tipo Forma Adquisicion:,
-t.Id_TipoDocumento..*151*8*Seleccion Tipo Documento:**1,
-t.Nro_Documento..*101**Nro Documento:,
+t.Id_TipoUnidadMedida.0.*111*7*Unidad Medida:,
+t.Id_TipoFormaAdquisicion.0.*111*5*Forma Adquisicion:,
+t.Id_TipoDocumento.0.*151*8*Seleccion Documento:**1,
+t.Nro_Documento.0.*101**Nro Documento:,
 t.Fec_Documento.0.*102**Fecha Documento:,
-t.Activo..*103**Check Activo:,
-t.Estado..*103**Check Estado:',
+t.Activo.0.*103**Check Activo:,
+t.Estado.0.*103**Check Estado:',
 't.dbo.grupo_bien',
 @Utabla)
 )
@@ -136,7 +138,7 @@ t.Id_TipoDocumento, t,
 t.Nro_Documento, t,
 convert(varchar, t.Fec_Documento, 23), t,
 t.Activo, t,
-t.Estado, t, null
+t.Estado
 from dbo.grupo_bien t where t.Id_GrupoBien = @data
 for xml path, type).value('.','varchar(max)'),1,1,''),
 m.dato, t1.dato, t2.dato, t3.dato, t4.dato, t5.dato, t6.dato,
