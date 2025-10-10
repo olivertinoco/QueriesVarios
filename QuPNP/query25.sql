@@ -23,8 +23,9 @@ dbo.tipo_donante|\
 dbo.tipo_unidad_medida|\
 dbo.tipo_forma_adquisicion|\
 dbo.tipo_documento|\
-dbo.tipo_grupo_bien|\
-dbo.catalogo_bien'
+dbo.proveedor|\
+dbo.persona|\
+dbo.tipo_vehiculo'
 ))t(tabla))
 insert into #tmp001_tablas exec(@tabla)
 select @tabla = (select tabla from #tmp001_tablas

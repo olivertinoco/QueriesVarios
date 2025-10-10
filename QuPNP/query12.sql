@@ -6,6 +6,7 @@ as
 begin
 set nocount on
 set language english
+declare @periodo_intervalo int = -1
 
 ;with tmp001_sep(t,r,i)as(
     select*from(values('|','~','^'))t(sepCampo,sepReg,sepLst)
@@ -36,7 +37,7 @@ desc grado cond|cip afectado|desc grado afect|unidad', r,
 from tmp001_sep
 )
 ,tmp001_periodo(mes, anno) as(
-    select right(100 + month(dateadd(mm, 0, getdate())), 2), year(dateadd(mm, 0, getdate()))
+    select right(100 + month(dateadd(mm, @periodo_intervalo, getdate())), 2), year(dateadd(mm, @periodo_intervalo, getdate()))
 )
 ,tmp001_tipo_funcion(data) as(
     select stuff((select r, Id_TipoFuncion, t, DescripcionL from dbo.tipo_funcion where estado = 1 and activo = 1
@@ -138,8 +139,9 @@ from tmp001_sep
     outer apply(select*from dbo.tipo_funcion tf where tf.Id_TipoFuncion = v.Id_TipoFuncion)tf
     outer apply(select*from dbo.tipo_grado tg1 where tg1.Id_TipoGrado = m1.IdGrado)tg1
     outer apply(select*from dbo.tipo_grado tg2 where tg2.Id_TipoGrado = m2.IdGrado)tg2
-    where o.Ano = p.anno and o.Mes = cast(p.mes as int) and o.estado = 1
-    and o.IdVehiculo = v.id_vehiculo and o.PlacaInterna = v.Placa_Interna
+    -- where o.Ano = p.anno and o.Mes = cast(p.mes as int)
+    where o.Ano = p.anno and o.Mes = cast(p.mes as int) + 1
+    and o.estado = 1 and o.IdVehiculo = v.id_vehiculo and o.PlacaInterna = v.Placa_Interna
     for xml path, type).value('.','varchar(max)'))
     from tmp001_sep, tmp003_cab
 )
@@ -155,8 +157,6 @@ end
 go
 
 exec dbo.usp_listaDotacionCombustible
-
-
 
 
 -- declare @data varchar(max)=(

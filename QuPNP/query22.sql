@@ -1,16 +1,15 @@
--- NOTA: CREACION DE MENUS DE TRANSPORTE:
--- =====================================
-select*from dbo.menu
-
-select*from dbo.menuTransportes
+-- -- NOTA: CREACION DE MENUS DE TRANSPORTE:
+-- -- =====================================
+-- select*from dbo.menu
 
 
--- go
--- create table dbo.menuTransportes(
---     id_menu varchar(6),
---     descripcion varchar(100),
---     data_router varchar(50)
--- )
+-- -- go
+-- -- create table dbo.menuTransportes(
+-- --     id_menu varchar(6),
+-- --     descripcion varchar(100),
+-- --     data_router varchar(50)
+-- -- )
+
 
 -- delete dbo.menuTransportes
 -- -- NOTA: PRIMER NIVEL
@@ -32,9 +31,8 @@ select*from dbo.menuTransportes
 -- select '020100', 'Carga Masiva Policiales', 'CargaMasivaPolicial02' union all
 -- select '020200', 'Carga Masiva Seguridad', 'CargaMasivaSeguridad02' union all
 -- select '020300', 'Carga Masiva Actualiza datos Vehiculos', null union all
--- select '030100', 'Vehiculo Policial Existente', null union all
--- select '030200', 'Vehiculo Seguridad Existente', null union all
--- select '030300', 'Vehiculo Policial/Seguridad Nuevo', null union all
+-- select '030100', 'Vehiculo Policial', null union all
+-- select '030200', 'Vehiculo Seguridad', null union all
 -- select '040100', 'Carga Masiva SOAT', null union all
 -- select '040200', 'Registrar/Actualizar SOAT', null union all
 -- select '040300', 'Registrar/Actualizar Identificacion Vehicular', null union all
@@ -65,9 +63,10 @@ select*from dbo.menuTransportes
 
 -- -- NOTA: TERCER NIVEL
 -- insert into dbo.menuTransportes
--- select '030101', 'Actualiza Datos Vehiculo/Alta/Asig o Reasig', 'CrudVehiculoPolicial03' union all
--- select '030201', 'Actualiza Datos Vehiculo/Alta/Asig o Reasig', 'CrudVehiculoSeguridad03' union all
--- select '030301', 'Datos Vehiculo/Alta/Asig-Reasig', null union all
+-- select '030101', 'Vehiculo Nuevo', 'CrudVehiculoPolicial03' union all
+-- select '030102', 'Vehiculo Existente', null union all
+-- select '030201', 'Vehiculo Nuevo', 'CrudVehiculoSeguridad03' union all
+-- select '030202', 'Vehiculo Existente', null union all
 -- select '100101', 'Tipo Registro', null union all
 -- select '100102', 'Tipo Estado Registro', null union all
 -- select '100103', 'Tipo Donante', null union all
@@ -125,3 +124,6 @@ select*from dbo.menuTransportes
 -- select '101203', 'Tipo Expediente', null union all
 -- select '101204', 'Tipo Proceso Judicial', null union all
 -- select '101205', 'Tipo Estado Operatividad', null
+
+
+-- select*from dbo.menuTransportes
