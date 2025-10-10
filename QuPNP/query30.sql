@@ -2,12 +2,22 @@ if exists(select 1 from sys.sysobjects where id=object_id('dbo.usp_crud_vehiculo
 drop procedure dbo.usp_crud_vehiculo
 go
 create procedure dbo.usp_crud_vehiculo
-@data varchar(50) = null
+@data varchar(100)
 as
 begin
 set nocount on
 set language english
 begin try
+declare @item tinyint = 0
+create table #tmp001_split(
+    item int identity,
+    dato varchar(100)
+)
+select @data = concat('select*from(values(''', replace(@data, '|', '''),('''), '''))t(a)')
+insert into #tmp001_split exec(@data)
+select @item = 1 from #tmp001_split where item = 1 and dato = 'zz'
+if @item = 1 select @data = dato from #tmp001_split where item = 2
+else select @data = dato from #tmp001_split where item = 1
 
 declare @Utabla tabla_generico
 insert into @Utabla
@@ -33,6 +43,9 @@ exec dbo.usp_listar_tablas 'dbo.vehiculo'
 )
 ,tmpCab_modelo(cab)as(
     select '~Modelo|Marca|Descripcion~100|100|350'
+)
+,tmpAux_documento(dato)as(
+    select '~0.0*****111*0*Documento:|0.1*0****101**Nro Documento:|0.2*0****102**Fecha Inicio:|0.3*****102**Fecha Final:'
 )
 ,hlp_tipo_vehiculo(dato)as(
     select concat(i, 1, (select r, Id_TipoVehiculo, t, DescripcionL, t, Id_ClaseVehiculo, t, Id_TipoClasificacionBien
@@ -131,15 +144,15 @@ exec dbo.usp_listar_tablas 'dbo.vehiculo'
     from tmp001_sep
 )
 ,hlp_tipo_documento(dato)as(
-    select concat(i, 0, (select r, Id_TipoDocumento, t, rtrim(DescripcionL)
+    select concat(i, 0, c.dato, (select r, Id_TipoDocumento, t, rtrim(DescripcionL)
     from dbo.tipo_documento where activo = 1 and estado = 1
     for xml path, type).value('.','varchar(max)'))
-    from tmp001_sep
+    from tmp001_sep, tmpAux_documento c
 )
 ,tmp001_meta(dato)as(
 select dato from dbo.udf_general_metadata(
 't.Id_Vehiculo..*100,
-t.Id_GrupoBien..*,
+t.Id_GrupoBien..*151*0*Grupo Bien:**1,
 t.Placa_Interna..*101**Placa Interna:,
 t.Placa_Rodaje..*101**Placa Rodaje:,
 t.Placa_Anterior..*101**Placa Anterior:,
@@ -151,8 +164,8 @@ t.Id_TipoModelo..*151*5*Seleccion Modelo:**1*2,
 t.Anio_Modelo..*101**Anno Modelo:,
 t.Anio_Fabricacion..*101**Anno Fabricacion:,
 t.Id_TipoColor..*151*6*Seleccion Color:**1,
-t.Nro_Motor..*101**Nro. Motor:,
-t.Nro_Serie..*101**Nro. Serie:,
+t.Nro_Motor..*101**Nro Motor:,
+t.Nro_Serie..*101**Nro Serie:,
 t.Precio..*101**Precio:,
 t.Id_TipoTransmision..*111*7*Transmision:,
 t.Nro_Asientos..*101**Nro Asientos:,
@@ -179,14 +192,14 @@ t.NroSerieCamaraIdentificacion..*101**Nro Serie Camara:,
 t.Id_TipoZonaRegistral..*111*11*Zona Registrar:,
 t.Id_TipoFuncion..*111*12*Tipo Funcion:,
 t.Id_TipoSituacionEspecial..*111*13*Situacion Especial:,
-t.Id_TipoObsAdquisicion..*151*14*Seleccion Obs. Adquisicion:**1,
+t.Id_TipoObsAdquisicion..*151*14*Seleccion Obs Adquisicion:**1,
 t.Id_TipoPropietario..*111*15*Procedencia:,
 t.Nro_TarjetaPropiedad..*101**Tarjeta Propiedad:,
 t.Id_TipoModalidadIngreso..*111*16*Modalidad Ingreso:,
 t.CUI..*101**CUI:,
 t.Anio_Adquirido..*101**Anno Adquisicion:,
 t.Fec_Adquisicion..*102**Fecha Adquision:,
-t.Fec_Expedicion_Tarjeta..*102**Fecha Adq. Tarjeta:',
+t.Fec_Expedicion_Tarjeta..*102**Fecha Adquisicion Tarjeta:',
 't.dbo.vehiculo',
 @Utabla)
 )
@@ -244,24 +257,25 @@ from dbo.vehiculo t where t.Id_Vehiculo = @data
 for xml path, type).value('.','varchar(max)'),
 m.dato, t1.dato, t2.dato, t3.dato, t4.dato, t5.dato, t6.dato,
 t7.dato, t8.dato, t9.dato, t10.dato, t11.dato, t12.dato, t13.dato,
-t14.dato, t15.dato, t16.dato)
-from tmp001_sep, tmp001_meta m,
-hlp_tipo_vehiculo t1,
-hlp_tipo_carroceria t2,
-hlp_tipo_categoria t3,
-hlp_tipo_marca t4,
-hlp_tipo_modelo t5,
-hlp_tipo_color t6,
-hlp_tipo_transmision t7,
-hlp_tipo_combustible t8,
-hlp_tipo_octanaje t9,
-hlp_tipo_formula_rodante t10,
-hlp_tipo_zona_registral t11,
-hlp_tipo_funcion t12,
-hlp_tipo_situacion_especial t13,
-hlp_tipo_obs_adquisicion t14,
-hlp_tipo_propietario t15,
-hlp_tipo_modalidad_ingreso t16
+t14.dato, t15.dato, t16.dato, t17.dato)
+from tmp001_sep cross apply tmp001_meta m
+outer apply(select*from hlp_tipo_vehiculo where @item=0) t1
+outer apply(select*from hlp_tipo_carroceria where @item=0) t2
+outer apply(select*from hlp_tipo_categoria where @item=0) t3
+outer apply(select*from hlp_tipo_marca where @item=0) t4
+outer apply(select*from hlp_tipo_modelo where @item=0) t5
+outer apply(select*from hlp_tipo_color where @item=0) t6
+outer apply(select*from hlp_tipo_transmision where @item=0) t7
+outer apply(select*from hlp_tipo_combustible where @item=0) t8
+outer apply(select*from hlp_tipo_octanaje where @item=0) t9
+outer apply(select*from hlp_tipo_formula_rodante where @item=0) t10
+outer apply(select*from hlp_tipo_zona_registral where @item=0) t11
+outer apply(select*from hlp_tipo_funcion where @item=0) t12
+outer apply(select*from hlp_tipo_situacion_especial where @item=0) t13
+outer apply(select*from hlp_tipo_obs_adquisicion where @item=0) t14
+outer apply(select*from hlp_tipo_propietario where @item=0) t15
+outer apply(select*from hlp_tipo_modalidad_ingreso where @item=0) t16
+outer apply(select*from hlp_tipo_documento where @item=0) t17
 
 end try
 begin catch
@@ -270,17 +284,24 @@ end catch
 end
 go
 
-
-declare
-@data varchar(100)
-= 335287
-
-exec dbo.usp_crud_vehiculo @data
-
-update t set Id_TipoVehiculo = null from dbo.vehiculo t where Id_Vehiculo = @data
+exec dbo.usp_crud_vehiculo 'zz|390008'
 
 
-select*from dbo.vehiculo where Id_Vehiculo = @data
+
+
+
+set rowcount 20
+select
+Id_GrupoBien,
+Id_TipoDocumento,
+Nro_Documento,
+Fec_Documento
+from dbo.grupo_bien
+
+
+select*from dbo.vehiculo order by Id_Vehiculo desc
+-- where Id_Vehiculo = @data
+
 
 
 -- t.IdDocumentoCambio..*,
