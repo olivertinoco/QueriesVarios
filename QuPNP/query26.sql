@@ -164,18 +164,3 @@ end
 go
 
 exec dbo.usp_crud_grupo_bien 0
-
-
-
-
-
--- declare @Utabla tabla_generico
--- insert into @Utabla
--- exec dbo.usp_listar_tablas 'dbo.grupo_bien'
--- select*from @Utabla
-
-
--- select*from mastertable('dbo.grupo_bien')
-
--- set rowcount 10
--- select*from dbo.grupo_bien
