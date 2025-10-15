@@ -42,10 +42,10 @@ exec dbo.usp_listar_tablas 'dbo.vehiculo'
     select '~Color|Descripcion~100|350'
 )
 ,tmpCab_modelo(cab)as(
-    select '~Modelo|Marca|Descripcion~100|100|350'
+    select '~idModelo|idMarca|Marca|Modelo~100|100|270|400'
 )
 ,tmpAux_documento(dato)as(
-    select '~0.0*****111*0*Documento:|0.1*0****101**Nro Documento:|0.2*0****102**Fecha Inicio:|0.3*****102**Fecha Final:'
+    select '~100.0*****111*0*Documento:|100.1*****101**Nro Documento:|100.2*****102**Fecha Inicio:|100.3*****102**Fecha Final:'
 )
 ,hlp_tipo_vehiculo(dato)as(
     select concat(i, 1, (select r, Id_TipoVehiculo, t, DescripcionL, t, Id_ClaseVehiculo, t, Id_TipoClasificacionBien
@@ -66,14 +66,15 @@ exec dbo.usp_listar_tablas 'dbo.vehiculo'
     from tmp001_sep, tmpCab_categoria c
 )
 ,hlp_tipo_marca(dato)as(
-    select concat(i, 4, c.cab, (select r, Id_TipoMarca, t, DescripcionL
+    select concat(i, 4, c.cab, (select r, Id_TipoMarca, t, rtrim(DescripcionL)
     from dbo.tipo_marca  where activo = 1 and estado = 1
     for xml path, type).value('.','varchar(max)'))
     from tmp001_sep, tmpCab_marca c
 )
 ,hlp_tipo_modelo(dato)as(
-    select concat(i, 5, c.cab, (select r, Id_TipoModelo, t, Id_TipoMarca, t, DescripcionL
-    from dbo.tipo_modelo  where activo = 1 and estado = 1
+    select concat(i, 5, c.cab, (select r, m.Id_TipoModelo, t, m.Id_TipoMarca, t, rtrim(a.DescripcionL), t, rtrim(m.DescripcionL)
+    from dbo.tipo_modelo m, dbo.tipo_marca a where m.Id_TipoMarca = a.Id_TipoMarca and m.activo = 1 and m.estado = 1
+    order by a.Id_TipoMarca, a.DescripcionL
     for xml path, type).value('.','varchar(max)'))
     from tmp001_sep, tmpCab_modelo c
 )
@@ -252,8 +253,11 @@ t.Id_TipoModalidadIngreso, t,
 t.CUI, t,
 t.Anio_Adquirido, t,
 convert(varchar, t.Fec_Adquisicion, 23), t,
-convert(varchar, t.Fec_Expedicion_Tarjeta, 23)
-from dbo.vehiculo t where t.Id_Vehiculo = @data
+convert(varchar, t.Fec_Expedicion_Tarjeta, 23), t,
+g.Nro_Documento
+from dbo.vehiculo t
+outer apply(select*from dbo.grupo_bien g where g.Id_GrupoBien = t.Id_GrupoBien)g
+where t.Id_Vehiculo = @data
 for xml path, type).value('.','varchar(max)'),
 m.dato, t1.dato, t2.dato, t3.dato, t4.dato, t5.dato, t6.dato,
 t7.dato, t8.dato, t9.dato, t10.dato, t11.dato, t12.dato, t13.dato,
@@ -284,21 +288,10 @@ end catch
 end
 go
 
-exec dbo.usp_crud_vehiculo 'zz|390008'
+exec dbo.usp_crud_vehiculo 'zz|335282'
 
 
-
-
-
-set rowcount 20
-select
-Id_GrupoBien,
-Id_TipoDocumento,
-Nro_Documento,
-Fec_Documento
-from dbo.grupo_bien
-
-
+set rowcount 10
 select*from dbo.vehiculo order by Id_Vehiculo desc
 -- where Id_Vehiculo = @data
 
