@@ -51,12 +51,12 @@ exec dbo.usp_listar_tablas 'dbo.grupo_bien'
     for xml path, type).value('.','varchar(max)'))
     from tmp001_sep
 )
-,hlp001_tipo_forma_adquisicion(dato)as(
-    select concat(i, 5, (select r, id_tipoFormaAdquisicion, t, rtrim(DescripcionL) from dbo.tipo_forma_adquisicion
-    where activo = 1 and estado = 1 order by DescripcionL
-    for xml path, type).value('.','varchar(max)'))
-    from tmp001_sep
-)
+-- ,hlp001_tipo_forma_adquisicion(dato)as(
+--     select concat(i, 5, (select r, id_tipoFormaAdquisicion, t, rtrim(DescripcionL) from dbo.tipo_forma_adquisicion
+--     where activo = 1 and estado = 1 order by DescripcionL
+--     for xml path, type).value('.','varchar(max)'))
+--     from tmp001_sep
+-- )
 ,hlp001_tipo_procedencia(dato)as(
     select concat(i, 6, (select r, id_tipoProcedencia, t, rtrim(DescripcionL) from dbo.tipo_procedencia
     where activo = 1 and estado = 1 order by DescripcionL
@@ -110,7 +110,6 @@ t.CantidadTotal..*101**Cantidad Total:*1,
 t.Id_TipoDonante.0.*151*10*Seleccion Donante:**1,
 t.ResolucionDonacion.0.*101**Resolucion Donante:,
 t.Id_TipoUnidadMedida.0.*111*7*Unidad Medida:,
-t.Id_TipoFormaAdquisicion.0.*111*5*Forma Adquisicion:,
 t.Id_TipoDocumento.0.*151*8*Seleccion Documento:**1,
 t.Nro_Documento.0.*101**Nro Documento:,
 t.Fec_Documento.0.*102**Fecha Documento:,
@@ -133,7 +132,6 @@ t.CantidadTotal, t,
 t.Id_TipoDonante, t,
 t.ResolucionDonacion, t,
 t.Id_TipoUnidadMedida, t,
-t.Id_TipoFormaAdquisicion, t,
 t.Id_TipoDocumento, t,
 t.Nro_Documento, t,
 convert(varchar, t.Fec_Documento, 23), t,
@@ -141,14 +139,13 @@ t.Activo, t,
 t.Estado
 from dbo.grupo_bien t where t.Id_GrupoBien = @data
 for xml path, type).value('.','varchar(max)'),1,1,''),
-m.dato, t1.dato, t2.dato, t3.dato, t4.dato, t5.dato, t6.dato,
+m.dato, t1.dato, t2.dato, t3.dato, t4.dato, t6.dato,
 t7.dato, t8.dato, t9.dato, t10.dato, t11.dato)
 from tmp001_sep, tmp001_meta m,
 hlp001_tipo_registro t1,
 hlp001_tipo_rubro t2,
 hlp001_tipo_estado_registro t3,
 hlp001_tipo_entidad t4,
-hlp001_tipo_forma_adquisicion t5,
 hlp001_tipo_procedencia t6,
 hlp001_tipo_unidad_medida t7,
 hlp001_tipo_documento t8,
@@ -164,3 +161,5 @@ end
 go
 
 exec dbo.usp_crud_grupo_bien 0
+
+select*from mastertable('dbo.grupo_bien')
