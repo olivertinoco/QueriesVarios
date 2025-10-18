@@ -5,9 +5,9 @@ create procedure dbo.usp_buscar_Grupo_bien
 @data varchar(300)
 as
 begin
+begin try
 set nocount on
 set language english
-begin try
 
 select top 0
 cast(null as int) Id_TipoDocumento,

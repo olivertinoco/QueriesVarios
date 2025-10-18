@@ -23,6 +23,9 @@ go
 -- (4, 'dbo.PR20_SeguimientoCAB')
 -- )t(item, tabla)
 
+-- insert into dbo.masterTablas
+-- select 4, 'dbo.prog_extraord'
+
 select*from dbo.masterTablas
 select*from dbo.masterAudit
 
