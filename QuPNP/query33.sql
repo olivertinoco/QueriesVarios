@@ -15,13 +15,14 @@ declare @periodo_intervalo int = -1
 )
 ,tmp001_cab(cab)as(
     select
-    'IdPrgV|IdV|IdCom|IdOct|Placa Interna|Placa Rodaje|Tipo Vehiculo|Tipo Combus.|Tipo Octanaje~10|10|10|10|150|150|300|100|100'
+    'p1|p2|IdPrgV|IdV|IdCom|IdOct|Placa Interna|Placa Rodaje|Tipo Vehiculo|Tipo Combus.|Tipo Octanaje~10|10|10|10|10|10|150|150|300|100|100'
 )
 ,tmp001_periodo(mes, anno) as(
     select right(100 + month(dateadd(mm, @periodo_intervalo, getdate())), 2), year(dateadd(mm, @periodo_intervalo, getdate()))
 )
-select concat(c.cab, (select r, t.Id_ProgVehiculo, t, t.id_vehiculo, t, rtrim(t.Id_TipoCombustible), t, t.Id_TipoOctanaje, t,
-t.Placa_Interna, t, t.Placa_Rodaje, t, rtrim(ti.DescripcionL), t, rtrim(tc.DescripcionL), t, rtrim(tg.DescripcionL)
+select concat(c.cab, (select r, t.Placa_Interna, t, t.Placa_Interna, t, t.Id_ProgVehiculo, t, t.id_vehiculo, t,
+rtrim(t.Id_TipoCombustible), t, t.Id_TipoOctanaje, t, t.Placa_Interna, t, t.Placa_Rodaje, t,
+rtrim(ti.DescripcionL), t, rtrim(tc.DescripcionL), t, rtrim(tg.DescripcionL)
 from dbo.prog_vehiculo t cross apply tmp001_periodo pp
 outer apply(select*from dbo.tipo_vehiculo ti where ti.Id_TipoVehiculo = t.Id_TipoVehiculo)ti
 outer apply(select*from dbo.tipo_combustible tc where tc.Id_TipoCombustible = t.Id_TipoCombustible)tc
@@ -59,10 +60,10 @@ set language english
 )
 ,tmp001_cab(cab)as(
     select
-'cod|Dpto|Prov|Dis|descr|subUni 1|subUni 2|subUni 3|subUni 4|subUni 5|subUni 6|subUni 7|subUni 8|subUni 9~\
-10|10|10|10|400|450|450|450|450|450|450|450|450|450'
+'cod|ubigeo|Dpto|Prov|Dis|descripcion Unidad:|subUni 1|subUni 2|subUni 3|subUni 4|subUni 5|subUni 6|subUni 7|subUni 8|subUni 9~\
+10|10|10|10|10|400|450|450|450|450|450|450|450|450|450'
 )
-select concat(c.cab, (select r, ltrim(str(t.coduni, 10,0)), t,
+select concat(c.cab, (select r, ltrim(str(t.coduni, 10,0)), t, u.Id_Ubigeo, t,
 rtrim(u.Departamento), t, rtrim(u.Provincia), t, rtrim(u.Distrito), t, rtrim(t.descx_final), t,
 t.xcol1, t, t.xcol2, t, t.xcol3, t, t.xcol4, t, t.xcol5, t, t.xcol6, t, t.xcol7, t, t.xcol8, t, t.xcol9
 from dbo.unidad_1 t
@@ -118,3 +119,6 @@ end
 go
 
 exec dbo.usp_buscar_CIP_programacion '13'
+
+
+set rowcount 10

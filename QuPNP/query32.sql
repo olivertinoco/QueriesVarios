@@ -23,8 +23,8 @@ declare @Utabla tabla_generico
 insert into @Utabla
 exec dbo.usp_listar_tablas 'dbo.prog_extraord'
 
-;with tmp001_sep(t,r,i)as(
-    select*from(values('|','~','^'))t(sepCampo,sepReg,sepLst)
+;with tmp001_sep(t,r,i,a)as(
+    select*from(values('|','~','^','*'))t(sepCampo,sepReg,sepLst,sepAux)
 )
 ,tmpAux_placaVehiculo(dato)as(
     select '~100.0*0****101**Placa Interna:'
@@ -82,35 +82,43 @@ exec dbo.usp_listar_tablas 'dbo.prog_extraord'
 ,hlp_cipConductor(dato)as(
     select concat(i, 992, t.dato) from tmpAux_cipConductor t, tmp001_sep
 )
+,tmp001_grupos(dato)as(
+    select stuff((select t, grupo, a, descr from(values
+    (0,'TIPO PROGRAMACION :'),(1,'DATO VEHICULO :'),
+    (2,'DATO COMISION :'),(3,'DATO CONDUCTOR (opcional) :'))t(grupo,descr)
+    for xml path, type).value('.','varchar(max)'),1,1,r)
+    from tmp001_sep
+)
 ,tmp001_meta(dato)as(
 select concat(dato,
-'|100.2*****101**Departamento:*1|100.3*****101**Provincia:*1|100.4*****101**Distrito:*1|100.5*****101**Nombres y Apellidos:*1')
+'|100.2*****101*26*Departamento:*1*2+6|100.3*****101*27*Provincia:*1*2+7|\
+100.4*****101*28*Distrito:*1*2+8|100.5*****101*29*Nombres y Apellidos:*1*3+25')
 from dbo.udf_general_metadata(
-'t.Id_ProgExtraOrd..*100,
-t.Id_ProgVehiculo..*100,
-t.Id_TipoProgramacion..*111*5*Tipo Programacion:**1,
-t.Id_Vehiculo..*100,
-t.Placa_Interna..*151*990*Placa Interna:*1*1*4,
-t.Placa_Rodaje..*101**Placa Rodaje:*1,
-t.Id_TipoCombustible..*111*1*Combustible:*1,
-t.Id_TipoOctanaje..*111*2*Octanaje:*1,
-t.Id_TipoDocumento..*111*3*Documento:,
-t.Nro_Documento..*101**Nro Documento:,
-t.Fec_Documento..*102**Fecha Documento:,
-t.Nro_OrdenComision..*101**Nro Ord Comision:,
-t.Fec_OrdenComision..*102**Fecha Ord Comision:,
-t.CapacidadTanque..*101**Capacidad Tanque:,
-t.RxGln..*101**Nro Galones:,
-t.Fec_InicioComision..*102**Fecha Inicio Comision:,
-t.Fec_TerminoComision..*102**Fecha Termino Comision:,
-t.Motivo_Comision..*101**Motivo Comision:,
-t.CIP_Conductor..*151*992*CIP Conductor:*1*1,
-t.Grado_Conductor..*111*6*Grado Conductor:*1,
-t.Id_UnidadSolicitante..*151*991*Unidad Solicitante:*1*1*4,
-t.Recorrido_Ida..*101**Recorrido Ida:,
-t.Recorrido_Retorno..*101**Recorrido Retorno:,
-t.Total_Gln_Ida..*101**Total Galn Ida:,
-t.Total_Gln_Retorno..*101**Total Galn Retorno:',
+'t.Id_ProgExtraOrd..*100*10***0+1,
+t.Id_ProgVehiculo..*100*11***0+2,
+t.Id_TipoProgramacion..*111*5*Tipo Programacion:**0+0*1,
+t.Id_Vehiculo..*100*12***0+3,
+t.Placa_Interna..*151*990*Placa Interna:*1*1+1*1*6,
+t.Placa_Rodaje..*101*7*Placa Rodaje:*1*1+2,
+t.Id_TipoCombustible..*111*1*Combustible:*1*1+3,
+t.Id_TipoOctanaje..*111*2*Octanaje:*1*1+4,
+t.Id_TipoDocumento..*111*3*Documento:**2+9,
+t.Nro_Documento..*101*13*Nro Documento:**2+10,
+t.Fec_Documento..*102*14*Fecha Documento:**2+11,
+t.Nro_OrdenComision..*101*15*Nro Ord Comision:**2+14,
+t.Fec_OrdenComision..*102*16*Fecha Ord Comision:**2+15,
+t.CapacidadTanque..*101*17*Capacidad Tanque:**2+12,
+t.RxGln..*101*18*Nro Galones:**2+13,
+t.Fec_InicioComision..*102*19*Fecha Inicio Comision:**2+16,
+t.Fec_TerminoComision..*102*20*Fecha Termino Comision:**2+17,
+t.Motivo_Comision..*101*21*Motivo Comision:**2+18,
+t.CIP_Conductor..*151*992*CIP Conductor:*1*3+23*1,
+t.Grado_Conductor..*111*6*Grado Conductor:*1*3+24,
+t.Id_UnidadSolicitante..*151*991*Unidad Solicitante:*1*2+5*1*5,
+t.Recorrido_Ida..*101*22*Recorrido Ida (Km):**2+19,
+t.Recorrido_Retorno..*101*23*Recorrido Retorno (Km):**2+20,
+t.Total_Gln_Ida..*101*24*Total Galones Ida (Gln):**2+21,
+t.Total_Gln_Retorno..*101*25*Total Galones Retorno (Gln):**2+22',
 't.dbo.prog_extraord',
 @Utabla)
 )
@@ -142,8 +150,8 @@ t.Total_Gln_Ida,t,
 t.Total_Gln_Retorno
 from dbo.PROG_EXTRAORD t where t.Id_ProgExtraOrd = @data
 for xml path, type).value('.','varchar(max)'),
-m.dato, t1.dato, t2.dato, t3.dato, t4.dato, t5.dato, t6.dato, t7.dato, t8.dato, t9.dato)
-from tmp001_sep cross apply tmp001_meta m
+m.dato, g.dato, t1.dato, t2.dato, t3.dato, t4.dato, t5.dato, t6.dato, t7.dato, t8.dato, t9.dato)
+from tmp001_sep cross apply tmp001_meta m cross apply tmp001_grupos g
 outer apply(select*from hlp_TipoCombustible where @item=0) t1
 outer apply(select*from hlp_TipoOctanaje where @item=0) t2
 outer apply(select*from hlp_TipoDocumento where @item=0) t3
