@@ -8,7 +8,8 @@ begin
 begin try
 set nocount on
 set language english
-declare @item tinyint = 0
+declare @item tinyint = 0, @param varchar(max)
+select top 0 cast(null as varchar(max)) dato into #tmp001_salida
 create table #tmp001_split(
     item int identity,
     dato varchar(100)
@@ -23,17 +24,28 @@ declare @Utabla tabla_generico
 insert into @Utabla
 exec dbo.usp_listar_tablas 'dbo.prog_extraord'
 
-;with tmp001_sep(t,r,i,a)as(
-    select*from(values('|','~','^','*'))t(sepCampo,sepReg,sepLst,sepAux)
+;with tmp001_sep(t,r,i,a,item)as(
+    select*,@item from(values('|','~','^','*'))t(sepCampo,sepReg,sepLst,sepAux)
+)
+,tmp001_param(dato)as(
+    select concat('990|991|992', r,
+    rtrim(t.Placa_Interna), t, rtrim(t.Id_UnidadSolicitante), t, rtrim(t.CIP_Conductor))
+    from dbo.PROG_EXTRAORD t, tmp001_sep where t.Id_ProgExtraOrd = @data and item=1
+)
+select @param = dato from tmp001_param
+exec dbo.usp_lista_hlp_prog_extraOrdinaria @param
+
+;with tmp001_sep(t,r,i,a,item)as(
+    select*,@item from(values('|','~','^','*'))t(sepCampo,sepReg,sepLst,sepAux)
 )
 ,tmpAux_placaVehiculo(dato)as(
-    select '~100.0*0****101**Placa Interna:'
+    select '~300.0*0****101**Placa Interna:~11|2*12|3*7|7*1|4*2|5'
 )
 ,tmpAux_unidadSolicita(dato)as(
-    select '~100.1*0****101**Unidad Destino:'
+    select '~300.1*0****101**Unidad Destino:***3~26|3*27|4*28|5'
 )
 ,tmpAux_cipConductor(dato)as(
-    select '~100.6*0*1***101**CIP del Conductor:'
+    select '~300.6*0*1***101**CIP del Conductor:~6|2*29|4'
 )
 ,hlp_TipoCombustible(dato)as(
     select concat(i, 1, (select r, rtrim(Id_TipoCombustible), t, rtrim(DescripcionL)
@@ -69,7 +81,7 @@ exec dbo.usp_listar_tablas 'dbo.prog_extraord'
 )
 ,hlp_TipoGrado(dato)as(
     select concat(i, 6, (select r, Id_TipoGrado, t, rtrim(DescripcionL)
-    from dbo.tipo_grado where activo = 1 and estado = 1
+    from dbo.tipo_grado -- where activo = 1 and estado = 1
     for xml path, type).value('.','varchar(max)'))
     from tmp001_sep
 )
@@ -92,13 +104,13 @@ exec dbo.usp_listar_tablas 'dbo.prog_extraord'
 ,tmp001_meta(dato)as(
 select concat(dato,
 '|100.2*****101*26*Departamento:*1*2+6|100.3*****101*27*Provincia:*1*2+7|\
-100.4*****101*28*Distrito:*1*2+8|100.5*****101*29*Nombres y Apellidos:*1*3+25')
+100.4*****101*28*Distrito:*1*2+8|100.5*****101*29*Nombres y Apellidos:*1*3+25*2|990*991*992')
 from dbo.udf_general_metadata(
 't.Id_ProgExtraOrd..*100*10***0+1,
 t.Id_ProgVehiculo..*100*11***0+2,
-t.Id_TipoProgramacion..*111*5*Tipo Programacion:**0+0*1,
+t.Id_TipoProgramacion..*111*5*Tipo Programacion:**0+0**1,
 t.Id_Vehiculo..*100*12***0+3,
-t.Placa_Interna..*151*990*Placa Interna:*1*1+1*1*6,
+t.Placa_Interna..*151*990*Placa Interna:*1*1+1**1*6,
 t.Placa_Rodaje..*101*7*Placa Rodaje:*1*1+2,
 t.Id_TipoCombustible..*111*1*Combustible:*1*1+3,
 t.Id_TipoOctanaje..*111*2*Octanaje:*1*1+4,
@@ -111,12 +123,12 @@ t.CapacidadTanque..*101*17*Capacidad Tanque:**2+12,
 t.RxGln..*101*18*Nro Galones:**2+13,
 t.Fec_InicioComision..*102*19*Fecha Inicio Comision:**2+16,
 t.Fec_TerminoComision..*102*20*Fecha Termino Comision:**2+17,
-t.Motivo_Comision..*101*21*Motivo Comision:**2+18,
-t.CIP_Conductor..*151*992*CIP Conductor:*1*3+23*1,
+t.Motivo_Comision..*101*21*Motivo Comision:**2+18*3,
+t.CIP_Conductor..*151*992*CIP Conductor:*1*3+23**1*3,
 t.Grado_Conductor..*111*6*Grado Conductor:*1*3+24,
-t.Id_UnidadSolicitante..*151*991*Unidad Solicitante:*1*2+5*1*5,
+t.Id_UnidadSolicitante..*151*991*Unidad Solicitante:*1*2+5*3*1*6,
 t.Recorrido_Ida..*101*22*Recorrido Ida (Km):**2+19,
-t.Recorrido_Retorno..*101*23*Recorrido Retorno (Km):**2+20,
+t.Recorrido_Retorno..*101*23*Recorrido Retorno (km):**2+20,
 t.Total_Gln_Ida..*101*24*Total Galones Ida (Gln):**2+21,
 t.Total_Gln_Retorno..*101*25*Total Galones Retorno (Gln):**2+22',
 't.dbo.prog_extraord',
@@ -129,7 +141,7 @@ t.Id_TipoProgramacion,t,
 t.Id_Vehiculo,t,
 t.Placa_Interna,t,
 t.Placa_Rodaje,t,
-t.Id_TipoCombustible,t,
+rtrim(t.Id_TipoCombustible),t,
 t.Id_TipoOctanaje,t,
 t.Id_TipoDocumento,t,
 t.Nro_Documento,t,
@@ -150,17 +162,19 @@ t.Total_Gln_Ida,t,
 t.Total_Gln_Retorno
 from dbo.PROG_EXTRAORD t where t.Id_ProgExtraOrd = @data
 for xml path, type).value('.','varchar(max)'),
-m.dato, g.dato, t1.dato, t2.dato, t3.dato, t4.dato, t5.dato, t6.dato, t7.dato, t8.dato, t9.dato)
+m.dato, g.dato, t1.dato, t2.dato, t3.dato, t4.dato, t5.dato, t6.dato,
+t7.dato, t8.dato, t9.dato, t10.dato)
 from tmp001_sep cross apply tmp001_meta m cross apply tmp001_grupos g
-outer apply(select*from hlp_TipoCombustible where @item=0) t1
-outer apply(select*from hlp_TipoOctanaje where @item=0) t2
-outer apply(select*from hlp_TipoDocumento where @item=0) t3
-outer apply(select*from hlp_TipoParada where @item=0) t4
-outer apply(select*from hlp_TipoProgramacion where @item=0) t5
-outer apply(select*from hlp_placaVehiculo where @item=0) t6
-outer apply(select*from hlp_unidadSolicita where @item=0) t7
-outer apply(select*from hlp_cipConductor where @item=0) t8
-outer apply(select*from hlp_TipoGrado where @item=0) t9
+outer apply(select*from hlp_TipoCombustible where item=0) t1
+outer apply(select*from hlp_TipoOctanaje where item=0) t2
+outer apply(select*from hlp_TipoDocumento where item=0) t3
+outer apply(select*from hlp_TipoParada where item=0) t4
+outer apply(select*from hlp_TipoProgramacion where item=0) t5
+outer apply(select*from hlp_placaVehiculo where item=0) t6
+outer apply(select*from hlp_unidadSolicita where item=0) t7
+outer apply(select*from hlp_cipConductor where item=0) t8
+outer apply(select*from hlp_TipoGrado where item=0) t9
+outer apply(select*from #tmp001_salida)t10
 
 end try
 begin catch
@@ -170,6 +184,7 @@ end
 go
 
 exec dbo.usp_crud_prog_extraOrdinaria '0'
+exec dbo.usp_crud_prog_extraOrdinaria 'zz|3'
 
 select*from dbo.PROG_EXTRAORD
 
@@ -179,13 +194,13 @@ select*from mastertable('dbo.PROG_EXTRAORD') order by column_id
 
 
 
-return
-select*from dbo.masterTablas
-select*from dbo.masterAudit
+-- return
+-- select*from dbo.masterTablas
+-- select*from dbo.masterAudit
 
-return
-select*from dbo.menu
-select*from dbo.menuTransportes
+-- return
+-- select*from dbo.menu
+-- select*from dbo.menuTransportes
 
 
 

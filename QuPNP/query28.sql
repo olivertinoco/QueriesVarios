@@ -3,18 +3,20 @@
 -- -- -- 'sda~|2|1|122312|ASSD|3.1|3.3|3.8|3.10|3.12'
 -- 'rwe~146|2|3.1|3.2'
 
-
 go
 if exists(select 1 from sys.sysobjects where id=object_id('dbo.usp_crud_generico01','p'))
 drop procedure dbo.usp_crud_generico01
 go
 create procedure dbo.usp_crud_generico01
-@data varchar(max)
+@data varchar(max),
+@param varchar(100) = ''
 as
 begin
+begin try
 set nocount on
 set language english
-begin try
+declare @tempGlob varchar(200) = replace(convert(varchar(36), newid()), '-','_')
+select @tempGlob = case @param when '' then @tempGlob else @param end
 
 declare
 @maxi int, @tablas varchar(max), @Utabla tabla_generico, @merge varchar(max),
@@ -45,20 +47,19 @@ select row_number()over(order by (select 0))+999 item,
 t.name, t.is_identity, t.default_object_id, t.is_primary_key
 from @Utabla t where audit = 1 order by esFecha offset 0 rows)t
 
-
 ;with tmp001_dato as(
     select*from #tmp001_dato
 )
 ,tmp001_tabla_out(dato)as(
     select concat(stuff((select ',',name, ' varchar(50)' from #tmp001_dato
     where is_primary_key = 1 order by orden1
-    for xml path, type).value('.','varchar(max)'),1,1,';create table #tmp001_salida('),')')
+    for xml path, type).value('.','varchar(max)'),1,1, concat(';create table ##tmp001_salida',@tempGlob,'(')),')')
 )
 ,tmp001_output(dato) as(
     select concat(stuff((select ',inserted.',name from #tmp001_dato
     where is_primary_key = 1 order by orden1
     for xml path, type).value('.','varchar(max)'),1,1,'output '),
-    ' into #tmp001_salida; select*from #tmp001_salida')
+    ' into ##tmp001_salida',@tempGlob,';')
 )
 ,tmp001_merge(dato) as(
     select concat(';merge into ', @tablas,
@@ -114,6 +115,9 @@ from tmp001_cab c
 
 exec(@tablas + @merge)
 
+if @param = ''
+exec('select*from ##tmp001_salida' + @tempGlob)
+
 end try
 begin catch
     select concat('error:', error_message())
@@ -127,8 +131,8 @@ declare @data varchar(max) =
 -- 'sda~|2|1|122312|ASSD|3.1|3.3|3.8|3.10|3.12'
 'rwe~146|2|3.1|3.2'
 
--- exec dbo.usp_crud_generico01 @data
+exec dbo.usp_crud_generico01 @data
 
 
-select *from dbo.grupo_bien where  Id_GrupoBien = 135
-select top 10 *from dbo.grupo_bien order by  Id_GrupoBien desc
+-- select *from dbo.grupo_bien where  Id_GrupoBien = 135
+-- select top 10 *from dbo.grupo_bien order by  Id_GrupoBien desc

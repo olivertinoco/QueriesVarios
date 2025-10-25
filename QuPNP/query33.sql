@@ -28,7 +28,7 @@ outer apply(select*from dbo.tipo_vehiculo ti where ti.Id_TipoVehiculo = t.Id_Tip
 outer apply(select*from dbo.tipo_combustible tc where tc.Id_TipoCombustible = t.Id_TipoCombustible)tc
 outer apply(select*from dbo.tipo_octanaje tg where tg.Id_TipoOctanaje = t.Id_TipoOctanaje)tg
 where t.Anio = pp.anno and t.mes = pp.mes and t.flag_entrega = 1 and
-t.Placa_Interna like concat('%', @data, '%')
+t.Placa_Interna like concat('%', rtrim(ltrim(@data)), '%')
 for xml path, type).value('.','varchar(max)'))
 from tmp001_sep, tmp001_cab c
 
@@ -43,7 +43,6 @@ exec dbo.usp_buscar_vehiculo_programacion 'TMP-0055'
 
 
 
-
 if exists(select 1 from sys.sysobjects where id=object_id('dbo.usp_buscar_unidad_programacion','p'))
 drop procedure dbo.usp_buscar_unidad_programacion
 go
@@ -54,25 +53,33 @@ begin
 begin try
 set nocount on
 set language english
+declare @item int
+create table #tmp001_tabla(
+    item int identity,
+    dato varchar(100)
+)
+insert into #tmp001_tabla select*from dbo.udf_split(@data, default)
+
+select @data = dato from #tmp001_tabla where item = 1
+select @item = isnull(nullif(coalesce((select dato from #tmp001_tabla where item = 2), '1'),''), @data)
 
 ;with tmp001_sep(t,r,i)as(
     select*from(values('|','~','^'))t(sepCampo,sepReg,sepLst)
 )
 ,tmp001_cab(cab)as(
     select
-'cod|ubigeo|Dpto|Prov|Dis|descripcion Unidad:|subUni 1|subUni 2|subUni 3|subUni 4|subUni 5|subUni 6|subUni 7|subUni 8|subUni 9~\
-10|10|10|10|10|400|450|450|450|450|450|450|450|450|450'
+'cod|desc|ubigeo|Dpto|Prov|Dis|descripcion Unidad:|subUni 1|subUni 2|subUni 3|subUni 4|subUni 5|subUni 6|subUni 7|subUni 8|subUni 9~\
+10|10|10|10|10|10|400|550|450|450|450|450|450|450|450|450'
 )
-select concat(c.cab, (select r, ltrim(str(t.coduni, 10,0)), t, u.Id_Ubigeo, t,
+select concat(c.cab, (select r, ltrim(str(t.coduni, 10,0)), t, rtrim(t.descx_final), t, u.Id_Ubigeo, t,
 rtrim(u.Departamento), t, rtrim(u.Provincia), t, rtrim(u.Distrito), t, rtrim(t.descx_final), t,
 t.xcol1, t, t.xcol2, t, t.xcol3, t, t.xcol4, t, t.xcol5, t, t.xcol6, t, t.xcol7, t, t.xcol8, t, t.xcol9
 from dbo.unidad_1 t
 outer apply(select*from dbo.UBIGEO u where u.Id_Ubigeo = right(cast(1000000 + t.ubigeo as int), 6))u
-where t.descx_final like concat('%', @data, '%')
+where (@item != 1 or t.descx_final like concat('%', rtrim(ltrim(@data)), '%')) and (@item = 1 or t.coduni = @item)
 order by t.coduni1, t.coduni2, t.cod2, t.cod3, t.cod4, t.cod5, t.cod6, t.cod7, t.cod8, t.cod9
 for xml path, type).value('.','varchar(max)'))
 from tmp001_sep, tmp001_cab c
-
 
 end try
 begin catch
@@ -81,7 +88,8 @@ end catch
 end
 go
 
-exec dbo.usp_buscar_unidad_programacion 'la noria'
+exec dbo.usp_buscar_unidad_programacion 'trujillo'
+exec dbo.usp_buscar_unidad_programacion '205419|'
 
 
 
@@ -101,15 +109,14 @@ set language english
     select*from(values('|','~',' '))t(sepCampo,sepReg,sepLst)
 )
 ,tmp001_cab(cab)as(
-    select 'idgrado|CIP|apellidos y nombres|Grado~10|100|400|150'
+    select 'cip1|cip2|idgrado|CIP|apellidos y nombres|Grado~10|10|10|100|400|150'
 )
-select concat(c.cab, (select r, ltrim(str(IdGrado,5,0)), t, Cip, t,
+select concat(c.cab, (select r, t.Cip, t, t.Cip, t, ltrim(str(IdGrado,5,0)), t, t.Cip, t,
 rtrim(Paterno), i, rtrim(Materno), i, rtrim(Nombres), t, rtrim(DesGrado)
-from dbo.masterPNP
-where cip like concat('%', @data, '%') order by cip
+from dbo.masterPNP t
+where cip like concat('%', rtrim(ltrim(@data)), '%') order by t.cip
 for xml path, type).value('.','varchar(max)'))
 from tmp001_sep, tmp001_cab c
-
 
 end try
 begin catch
@@ -118,7 +125,8 @@ end catch
 end
 go
 
-exec dbo.usp_buscar_CIP_programacion '13'
-
+exec dbo.usp_buscar_CIP_programacion '30043331'
 
 set rowcount 10
+
+select*from dbo.prog_extraord t where t.Id_ProgExtraOrd = 3
