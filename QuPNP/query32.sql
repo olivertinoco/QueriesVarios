@@ -9,7 +9,7 @@ begin try
 set nocount on
 set language english
 declare @item tinyint = 0, @param varchar(max)
-select top 0 cast(null as varchar(max)) dato into #tmp001_salida
+select top 0 cast(null as varchar(max)) dato into #lista_hlp_prog_extraOrdinaria
 create table #tmp001_split(
     item int identity,
     dato varchar(100)
@@ -22,7 +22,7 @@ else select @data = dato from #tmp001_split where item = 1
 
 declare @Utabla tabla_generico
 insert into @Utabla
-exec dbo.usp_listar_tablas 'dbo.prog_extraord'
+exec dbo.usp_listar_tablas 'dbo.prog_extraord,dbo.prog_ruta'
 
 ;with tmp001_sep(t,r,i,a,item)as(
     select*,@item from(values('|','~','^','*'))t(sepCampo,sepReg,sepLst,sepAux)
@@ -43,6 +43,9 @@ exec dbo.usp_lista_hlp_prog_extraOrdinaria @param
 )
 ,tmpAux_unidadSolicita(dato)as(
     select '~300.1*0****101**Unidad Destino:***3~26|3*27|4*28|5'
+)
+,tmpAux_unidad(dato)as(
+    select '~400.0*0****101**Unidad Destino:***3~30|3*31|4*32|5'
 )
 ,tmpAux_cipConductor(dato)as(
     select '~300.6*0*1***101**CIP del Conductor:~6|2*29|4'
@@ -71,6 +74,12 @@ exec dbo.usp_lista_hlp_prog_extraOrdinaria @param
     for xml path, type).value('.','varchar(max)'))
     from tmp001_sep
 )
+,hlp_grifos(dato)as(
+    select concat(i, 77, (select r, id_grifo, t, rtrim(dbo.fn_LimpiarXML(NombreGrifo)), t, rtrim(direccion)
+    from dbo.grifo where activo = 1 and estado = 1
+    for xml path, type).value('.','varchar(max)'))
+    from tmp001_sep
+)
 ,hlp_TipoProgramacion(dato)as(
     select concat(i, 5, (select r, id, t, descr
     from(values(1, 'Programacion Ordinaria'),(2, 'Programacion ExtraOrdinaria'))t(id,descr)
@@ -94,17 +103,60 @@ exec dbo.usp_lista_hlp_prog_extraOrdinaria @param
 ,hlp_cipConductor(dato)as(
     select concat(i, 992, t.dato) from tmpAux_cipConductor t, tmp001_sep
 )
+,hlp_unidad(dato)as(
+    select concat(i, 993, t.dato) from tmpAux_unidad t, tmp001_sep
+)
+,tmp001_cab_prog_ruta(dato)as(
+select '~dato|a1|a2|a3|a4|a5|a6|a7|a8|a9|a10|UNIDAD|MOVIMIENTO|OBSERVACION~10|10|10|10|10|10|10|10|10|10|10|600|200|300'
+)
+,tmp001_prog_ruta(dato)as(
+select stuff((select '+', substring(t.value, 0, charindex(a, t.value))
+from dbo.udf_general_metadata(
+'tt.Id_ProgRuta..*,
+tt.Id_ProgExtraOrd..*,
+tt.Id_TipoParada..*,
+tt.Id_Unidad..*,
+tt.Observaciones..*,
+tt.Dias_Permanencia..*,
+tt.activo..*',
+'tt.dbo.prog_ruta',
+@Utabla)tt cross apply dbo.udf_split(dato, default)t
+for xml path, type).value('.','varchar(max)'),1,2,'')
+from tmp001_sep
+)
+,info001_prog_ruta(dato)as(
+    select concat(i, 741, c.dato, (select r, r.dato, t,
+    t.Id_ProgRuta, t,
+    t.Id_ProgExtraOrd, t,
+    t.Id_TipoParada, t,
+    t.Id_Unidad, t,
+    rtrim(t.Observaciones), t,
+    t.Dias_Permanencia, t,
+    t.activo, t,
+    rtrim(u.Departamento), t, rtrim(u.Provincia), t, rtrim(u.Distrito), t,
+    rtrim(tt.descx_final), t, rtrim(ttt.DescripcionL), t, rtrim(t.Observaciones)
+    from dbo.prog_ruta t, dbo.unidad_1 tt, dbo.ubigeo u, dbo.tipo_parada ttt
+    where t.Id_Unidad = tt.coduni and right(cast(1000000 + tt.ubigeo as int), 6) = u.Id_Ubigeo
+    and t.id_tipoParada = ttt.id_tipoParada and t.activo = 1 and t.estado = 1
+    and t.Id_ProgExtraOrd = @data
+    for xml path, type).value('.','varchar(max)'))
+    from tmp001_sep, tmp001_cab_prog_ruta c, tmp001_prog_ruta r
+)
 ,tmp001_grupos(dato)as(
     select stuff((select t, grupo, a, descr from(values
     (0,'TIPO PROGRAMACION :'),(1,'DATO VEHICULO :'),
-    (2,'DATO COMISION :'),(3,'DATO CONDUCTOR (opcional) :'))t(grupo,descr)
+    (2,'DATO COMISION :'),(3,'DATO CONDUCTOR (opcional) :'),(4,'RUTA :'))t(grupo,descr)
     for xml path, type).value('.','varchar(max)'),1,1,r)
     from tmp001_sep
 )
 ,tmp001_meta(dato)as(
 select concat(dato,
 '|100.2*****101*26*Departamento:*1*2+6|100.3*****101*27*Provincia:*1*2+7|\
-100.4*****101*28*Distrito:*1*2+8|100.5*****101*29*Nombres y Apellidos:*1*3+25*2|990*991*992')
+100.4*****101*28*Distrito:*1*2+8|100.5*****101*29*Nombres y Apellidos:*1*3+25*2|\
+100.6*****151*993*UNIDAD:*1*4+26*2*1*6|100.7*****101*30*Departamento:*1*4+27|\
+100.8*****101*31*Provincia:*1*4+28|100.9*****101*32*Distrito:*1*4+29|\
+100.10*****111*4*Tipo Movimiento:**4+30|100.11*****101*34*Observacion :**4+31*2|\
+100.12**1***101*35*Dias Permanencia :**4+32')
 from dbo.udf_general_metadata(
 't.Id_ProgExtraOrd..*100*10***0+1,
 t.Id_ProgVehiculo..*100*11***0+2,
@@ -163,7 +215,7 @@ t.Total_Gln_Retorno
 from dbo.PROG_EXTRAORD t where t.Id_ProgExtraOrd = @data
 for xml path, type).value('.','varchar(max)'),
 m.dato, g.dato, t1.dato, t2.dato, t3.dato, t4.dato, t5.dato, t6.dato,
-t7.dato, t8.dato, t9.dato, t10.dato)
+t7.dato, t8.dato, t9.dato, t10.dato, t11.dato, t12.dato)
 from tmp001_sep cross apply tmp001_meta m cross apply tmp001_grupos g
 outer apply(select*from hlp_TipoCombustible where item=0) t1
 outer apply(select*from hlp_TipoOctanaje where item=0) t2
@@ -174,7 +226,9 @@ outer apply(select*from hlp_placaVehiculo where item=0) t6
 outer apply(select*from hlp_unidadSolicita where item=0) t7
 outer apply(select*from hlp_cipConductor where item=0) t8
 outer apply(select*from hlp_TipoGrado where item=0) t9
-outer apply(select*from #tmp001_salida)t10
+outer apply(select*from hlp_unidad where item=0) t11
+outer apply(select*from #lista_hlp_prog_extraOrdinaria)t10
+outer apply(select*from info001_prog_ruta where item != 0) t12
 
 end try
 begin catch
@@ -186,10 +240,11 @@ go
 exec dbo.usp_crud_prog_extraOrdinaria '0'
 exec dbo.usp_crud_prog_extraOrdinaria 'zz|3'
 
-select*from dbo.PROG_EXTRAORD
 
+select*from dbo.prog_ruta
+select*from dbo.mastertable('dbo.prog_ruta')
 
-select*from mastertable('dbo.PROG_EXTRAORD') order by column_id
+-- select*from mastertable('dbo.PROG_EXTRAORD') order by column_id
 
 
 

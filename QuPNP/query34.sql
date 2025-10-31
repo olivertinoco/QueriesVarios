@@ -43,7 +43,7 @@ insert into #tmp002_param exec dbo.usp_buscar_CIP_programacion @dato
 ;with tmp001_sep(t,r,i)as(
     select*from(values('|','~','^'))t(sepCampo,sepReg,sepLst)
 )
-insert into #tmp001_salida
+insert into #lista_hlp_prog_extraOrdinaria
 select stuff((select i, item, r, dato  from #tmp002_param
 for xml path, type).value('.','varchar(max)'),1,1,r)
 from tmp001_sep
@@ -57,13 +57,13 @@ go
 
 
 select top 0
-cast(null as varchar(max)) dato into #tmp001_salida
+cast(null as varchar(max)) dato into #lista_hlp_prog_extraOrdinaria
 
 declare @data varchar(max)
 = '990|991|992~IL-24561|205419|30043331'
 
 exec dbo.usp_lista_hlp_prog_extraOrdinaria @data
 
-select*from #tmp001_salida
+select*from #lista_hlp_prog_extraOrdinaria
 
 select*from dbo.prog_extraord t where t.Id_ProgExtraOrd = 3
