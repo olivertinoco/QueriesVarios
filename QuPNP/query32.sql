@@ -153,9 +153,9 @@ from tmp001_sep
 select concat(dato,
 '|100.2*****101*26*Departamento:*1*2+6|100.3*****101*27*Provincia:*1*2+7|\
 100.4*****101*28*Distrito:*1*2+8|100.5*****101*29*Nombres y Apellidos:*1*3+25*2|\
-100.6*****151*993*UNIDAD:*1*4+26*2*1*6|100.7*****101*30*Departamento:*1*4+27|\
+100.6*0****151*993*UNIDAD:*1*4+26*2*1*6|100.7*****101*30*Departamento:*1*4+27|\
 100.8*****101*31*Provincia:*1*4+28|100.9*****101*32*Distrito:*1*4+29|\
-100.10*****111*4*Tipo Movimiento:**4+30|100.11*****101*34*Observacion :**4+31*2|\
+100.10*0****111*4*Tipo Movimiento:**4+30|100.11*****101*34*Observacion :**4+31*2|\
 100.12**1***101*35*Dias Permanencia :**4+32')
 from dbo.udf_general_metadata(
 't.Id_ProgExtraOrd..*100*10***0+1,
