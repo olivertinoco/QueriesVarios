@@ -125,7 +125,7 @@ for xml path, type).value('.','varchar(max)'),1,2,'')
 from tmp001_sep
 )
 ,info001_prog_ruta(dato)as(
-    select concat(i, 741, c.dato, (select r, r.dato, t,
+    select concat(i, 741, c.dato, isnull((select r, r.dato, t,
     t.Id_ProgRuta, t,
     t.Id_ProgExtraOrd, t,
     t.Id_TipoParada, t,
@@ -139,7 +139,7 @@ from tmp001_sep
     where t.Id_Unidad = tt.coduni and right(cast(1000000 + tt.ubigeo as int), 6) = u.Id_Ubigeo
     and t.id_tipoParada = ttt.id_tipoParada and t.activo = 1 and t.estado = 1
     and t.Id_ProgExtraOrd = @data
-    for xml path, type).value('.','varchar(max)'))
+    for xml path, type).value('.','varchar(max)'), concat(r, r.dato)))
     from tmp001_sep, tmp001_cab_prog_ruta c, tmp001_prog_ruta r
 )
 ,tmp001_grupos(dato)as(
@@ -228,7 +228,7 @@ outer apply(select*from hlp_cipConductor where item=0) t8
 outer apply(select*from hlp_TipoGrado where item=0) t9
 outer apply(select*from hlp_unidad where item=0) t11
 outer apply(select*from #lista_hlp_prog_extraOrdinaria)t10
-outer apply(select*from info001_prog_ruta where item != 0) t12
+outer apply(select*from info001_prog_ruta) t12
 
 end try
 begin catch
@@ -238,9 +238,10 @@ end
 go
 
 exec dbo.usp_crud_prog_extraOrdinaria '0'
-exec dbo.usp_crud_prog_extraOrdinaria 'zz|3'
+-- exec dbo.usp_crud_prog_extraOrdinaria 'zz|3'
 
 
+return
 select*from dbo.prog_ruta
 select*from dbo.mastertable('dbo.prog_ruta')
 
