@@ -8,7 +8,7 @@ begin
 begin try
 set nocount on
 set language english
-declare @periodo_intervalo int = -1
+declare @periodo_intervalo int = -2
 
 ;with tmp001_sep(t,r,i)as(
     select*from(values('|','~','^'))t(sepCampo,sepReg,sepLst)
@@ -40,7 +40,7 @@ end
 go
 
 exec dbo.usp_buscar_vehiculo_programacion 'TMP-0055'
-
+exec dbo.usp_buscar_vehiculo_programacion '333'
 
 
 if exists(select 1 from sys.sysobjects where id=object_id('dbo.usp_buscar_unidad_programacion','p'))
