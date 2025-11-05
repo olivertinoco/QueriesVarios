@@ -121,11 +121,11 @@ tt.Dias_Permanencia..*,
 tt.activo..*',
 'tt.dbo.prog_ruta',
 @Utabla)tt cross apply dbo.udf_split(dato, default)t
-for xml path, type).value('.','varchar(max)'),1,2,'')
+for xml path, type).value('.','varchar(max)'),1,2,r)
 from tmp001_sep
 )
 ,info001_prog_ruta(dato)as(
-    select concat(i, 741, c.dato, isnull((select r, r.dato, t,
+    select concat(i, 741, r.dato, c.dato, (select r.dato, t,
     t.Id_ProgRuta, t,
     t.Id_ProgExtraOrd, t,
     t.Id_TipoParada, t,
@@ -139,7 +139,7 @@ from tmp001_sep
     where t.Id_Unidad = tt.coduni and right(cast(1000000 + tt.ubigeo as int), 6) = u.Id_Ubigeo
     and t.id_tipoParada = ttt.id_tipoParada and t.activo = 1 and t.estado = 1
     and t.Id_ProgExtraOrd = @data
-    for xml path, type).value('.','varchar(max)'), concat(r, r.dato)))
+    for xml path, type).value('.','varchar(max)'))
     from tmp001_sep, tmp001_cab_prog_ruta c, tmp001_prog_ruta r
 )
 ,tmp001_grupos(dato)as(
