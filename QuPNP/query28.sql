@@ -16,7 +16,8 @@ begin
 begin try
 set nocount on
 set language english
-declare @cab varchar(300), @aux varchar(max), @tempGlob varchar(200) = replace(convert(varchar(36), newid()), '-','_')
+declare @cab varchar(300), @aux varchar(max),
+@tempGlob varchar(200) = replace(convert(varchar(36), newid()), '-','_')
 select @tempGlob = case @param when '' then @tempGlob else @param end
 
 declare
@@ -25,7 +26,7 @@ declare
 select @data = stuff(@data,1, charindex('~',@data), '')
 create table #tmp001_param(
     orden1 int identity,
-    dato varchar(1000)
+    dato varchar(1000) collate database_default
 )
 select @data = concat('select*from(values(''', replace(@data, '|', '''),('''), '''))t(a)')
 insert into #tmp001_param exec(@data)

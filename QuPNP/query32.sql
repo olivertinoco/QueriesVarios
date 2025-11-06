@@ -138,7 +138,7 @@ from tmp001_sep
     from dbo.prog_ruta t, dbo.unidad_1 tt, dbo.ubigeo u, dbo.tipo_parada ttt
     where t.Id_Unidad = tt.coduni and right(cast(1000000 + tt.ubigeo as int), 6) = u.Id_Ubigeo
     and t.id_tipoParada = ttt.id_tipoParada and t.activo = 1 and t.estado = 1
-    and t.Id_ProgExtraOrd = @data
+    and t.Id_ProgExtraOrd = @data order by t.Id_ProgRuta
     for xml path, type).value('.','varchar(max)'))
     from tmp001_sep, tmp001_cab_prog_ruta c, tmp001_prog_ruta r
 )
