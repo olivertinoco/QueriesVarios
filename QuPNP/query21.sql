@@ -43,7 +43,7 @@ begin
 set nocount on
 create table #tmp541yz_param(
     orden int identity,
-    tablas varchar(200)
+    tablas varchar(200) collate database_default
 )
 insert into #tmp541yz_param
 select tt.n.value('.','varchar(max)')
