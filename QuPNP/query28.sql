@@ -10,13 +10,14 @@ drop procedure dbo.usp_crud_generico01
 go
 create procedure dbo.usp_crud_generico01
 @data varchar(max),
-@param varchar(100) = ''
+@param varchar(100) = '',
+@pks varchar(100) = ''
 as
 begin
 begin try
 set nocount on
 set language english
-declare @cab varchar(300), @aux varchar(max),
+declare @cab varchar(300), @aux varchar(max), @camposPKs varchar(1000) = '',
 @tempGlob varchar(200) = replace(convert(varchar(36), newid()), '-','_')
 select @tempGlob = case @param when '' then @tempGlob else @param end
 
@@ -134,8 +135,11 @@ select @tablas += concat('insert into #tmp001_datos select*,''', @usuario, ''','
 convert(varchar, getdate(), 121), ''' from(values(''',
 replace(replace(@aux, '|', ''','''), '~', '''),('''), '''))t(', @cab, ')')
 
+if object_id('tempdb..#tmp001_pks') is not null
+select @camposPKs = concat(';update t set t.', name, '=tt.pks from #tmp001_datos t, #tmp001_pks tt')
+from #tmp001_dato where name = @pks
 
-exec(@tablas + @merge)
+exec(@tablas + @camposPKs + @merge)
 
 if @param = ''
 exec('select*from ##tmp001_salida' + @tempGlob)
