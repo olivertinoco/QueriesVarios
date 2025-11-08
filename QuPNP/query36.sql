@@ -28,6 +28,7 @@ if exists(select 1 from #tmp001_tablas where dato != '' having count(1) = 2)begi
     select @nombreCampo = name from tempdb.sys.columns where object_id = object_id(@nombreCampo)
     select @data = dato from #tmp001_tablas where item = 2
     exec dbo.usp_crud_generico01 @data, @tempGlob, @nombreCampo
+
     select @pks = pks from #tmp001_pks
     delete #tmp001_pks
     exec ('insert into #tmp001_pks select*from ##tmp001_salida' + @tempGlob)
@@ -39,14 +40,14 @@ end
 if exists(select 1 from #tmp001_tablas where item = 2 and dato = '' )begin
     select @data = dato from #tmp001_tablas where item = 1
     exec dbo.usp_crud_generico01 @data, @tempGlob
+
     exec ('select*from ##tmp001_salida' + @tempGlob)
 end
 if exists(select 1 from #tmp001_tablas where item = 1 and dato = '' )begin
     select @data = dato from #tmp001_tablas where item = 2
     exec dbo.usp_crud_generico01 @data, @tempGlob
+
     exec ('insert into #tmp001_pks select*from ##tmp001_salida' + @tempGlob)
-
-
     select @data = tt.Id_ProgExtraOrd from #tmp001_pks t, dbo.prog_ruta tt where t.pks = tt.Id_ProgRuta
     exec dbo.usp_listar_prog_rutas @data
 end
@@ -60,7 +61,7 @@ go
 
 
 
-
+return
 declare @data varchar(max) =
 -- '1457~32|3|2|240274|PRUEBA DE OBSERVACION DE DATOS 01|52|0|35|3|5|240267|PRUEBA DE OBSERVACION DE DATOS 04|55|0|40|3|3|228674|SALUDO|0|0|42|3|3|228674|SALUDO|0|0||3|3|239376|OLIVER PRUEBA||1|5.1|5.2|5.3|5.4|5.5|5.6|5.9|5.1|5.2|5.3|5.4|5.5|5.6|5.9|5.1|5.2|5.3|5.4|5.5|5.6|5.9|5.1|5.2|5.3|5.4|5.5|5.6|5.9|5.1|5.2|5.3|5.4|5.5|5.6|5.9'
 -- '1457~3|368459|4036|DFS2|4.1|4.4|4.2|4.25^1457~35|3|5|240267|PRUEBA DE OBSERVACION DE DATOS 04|55|0|5.1|5.2|5.3|5.4|5.5|5.6|5.9'
