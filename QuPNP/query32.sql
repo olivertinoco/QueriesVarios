@@ -50,6 +50,9 @@ exec dbo.usp_lista_hlp_prog_extraOrdinaria @param
 ,tmpAux_cipConductor(dato)as(
     select '~300.6*0*1***101**CIP del Conductor:~6|2*29|4'
 )
+,tmpAux_metaDataGrifo(dato)as(
+    select '~300.21*0****101**Dotacion (Gln):|300.22*****102**Abastecimiento:'
+)
 ,hlp_TipoCombustible(dato)as(
     select concat(i, 1, (select r, rtrim(Id_TipoCombustible), t, rtrim(DescripcionL)
     from dbo.TIPO_COMBUSTIBLE where activo = 1 and estado = 1 order by 2
@@ -74,11 +77,18 @@ exec dbo.usp_lista_hlp_prog_extraOrdinaria @param
     for xml path, type).value('.','varchar(max)'))
     from tmp001_sep
 )
+,tmp001_cab_grifo(dato)as(
+    select '~a1|RUC|NOMBRE|DIRECCION|DEPARTAMENTO|PROVINCIA|DISTRITO~10|150|400|600|350|350|350'
+)
 ,hlp_grifos(dato)as(
-    select concat(i, 77, (select r, id_grifo, t, rtrim(dbo.fn_LimpiarXML(NombreGrifo)), t, rtrim(direccion)
-    from dbo.grifo where activo = 1 and estado = 1
+    select concat(i, 77, m.dato, c.dato, (select r, t.id_grifo, t, t.Nro_RUC, t,
+    rtrim(dbo.fn_LimpiarXML(t.NombreGrifo)), t, rtrim(t.direccion), t,
+    rtrim(u.Departamento), t, rtrim(u.Provincia), t, rtrim(u.Distrito)
+    from dbo.grifo t
+    outer apply(select*from dbo.UBIGEO u where u.Id_Ubigeo =t.Id_Ubigeo)u
+    where t.activo = 1 and t.estado = 1 order by t.Nro_RUC desc
     for xml path, type).value('.','varchar(max)'))
-    from tmp001_sep
+    from tmp001_sep, tmp001_cab_grifo c, tmpAux_metaDataGrifo m
 )
 ,hlp_TipoProgramacion(dato)as(
     select concat(i, 5, (select r, id, t, descr
@@ -215,7 +225,7 @@ t.Total_Gln_Retorno
 from dbo.PROG_EXTRAORD t where t.Id_ProgExtraOrd = @data
 for xml path, type).value('.','varchar(max)'),
 m.dato, g.dato, t1.dato, t2.dato, t3.dato, t4.dato, t5.dato, t6.dato,
-t7.dato, t8.dato, t9.dato, t10.dato, t11.dato, t12.dato)
+t7.dato, t8.dato, t9.dato, t10.dato, t11.dato, t12.dato, t13.dato)
 from tmp001_sep cross apply tmp001_meta m cross apply tmp001_grupos g
 outer apply(select*from hlp_TipoCombustible where item=0) t1
 outer apply(select*from hlp_TipoOctanaje where item=0) t2
@@ -227,6 +237,7 @@ outer apply(select*from hlp_unidadSolicita where item=0) t7
 outer apply(select*from hlp_cipConductor where item=0) t8
 outer apply(select*from hlp_TipoGrado where item=0) t9
 outer apply(select*from hlp_unidad where item=0) t11
+outer apply(select*from hlp_grifos where item=0) t13
 outer apply(select*from #lista_hlp_prog_extraOrdinaria)t10
 outer apply(select*from info001_prog_ruta) t12
 
