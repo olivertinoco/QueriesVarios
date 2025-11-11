@@ -22,7 +22,7 @@ else select @data = dato from #tmp001_split where item = 1
 
 declare @Utabla tabla_generico
 insert into @Utabla
-exec dbo.usp_listar_tablas 'dbo.prog_extraord,dbo.prog_ruta'
+exec dbo.usp_listar_tablas 'dbo.prog_extraord,dbo.prog_ruta,dbo.prog_eo_grifo'
 
 ;with tmp001_sep(t,r,i,a,item)as(
     select*,@item from(values('|','~','^','*'))t(sepCampo,sepReg,sepLst,sepAux)
@@ -51,7 +51,9 @@ exec dbo.usp_lista_hlp_prog_extraOrdinaria @param
     select '~300.6*0*1***101**CIP del Conductor:~6|2*29|4'
 )
 ,tmpAux_metaDataGrifo(dato)as(
-    select '~300.21*0****101**Dotacion (Gln):|300.22*****102**Abastecimiento:'
+select '~300.23*0****151*701*Nombre del Grifo:*1**2*1*1*1200|300.25*****101*702*Departamento:*1|\
+300.26*****101*703*Provincia:*1|300.27*****101*704*Distrito:*1|\
+300.21*0****101*705*Dotacion (Gln):|300.22*****102*706*Abastecimiento:'
 )
 ,hlp_TipoCombustible(dato)as(
     select concat(i, 1, (select r, rtrim(Id_TipoCombustible), t, rtrim(DescripcionL)
@@ -78,12 +80,13 @@ exec dbo.usp_lista_hlp_prog_extraOrdinaria @param
     from tmp001_sep
 )
 ,tmp001_cab_grifo(dato)as(
-    select '~a1|RUC|NOMBRE|DIRECCION|DEPARTAMENTO|PROVINCIA|DISTRITO~10|150|400|600|350|350|350'
+    select '~a1|RUC|NOMBRE|DIRECCION|DEPARTAMENTO|PROVINCIA|DISTRITO|NOMBRE~10|150|400|600|350|350|350|10'
 )
 ,hlp_grifos(dato)as(
     select concat(i, 77, m.dato, c.dato, (select r, t.id_grifo, t, t.Nro_RUC, t,
     rtrim(dbo.fn_LimpiarXML(t.NombreGrifo)), t, rtrim(t.direccion), t,
-    rtrim(u.Departamento), t, rtrim(u.Provincia), t, rtrim(u.Distrito)
+    rtrim(u.Departamento), t, rtrim(u.Provincia), t, rtrim(u.Distrito), t,
+    rtrim(dbo.fn_LimpiarXML(t.NombreGrifo))
     from dbo.grifo t
     outer apply(select*from dbo.UBIGEO u where u.Id_Ubigeo =t.Id_Ubigeo)u
     where t.activo = 1 and t.estado = 1 order by t.Nro_RUC desc
@@ -130,7 +133,7 @@ tt.Observaciones..*,
 tt.Dias_Permanencia..*,
 tt.activo..*',
 'tt.dbo.prog_ruta',
-@Utabla)tt cross apply dbo.udf_split(dato, default)t
+@Utabla)tt cross apply dbo.udf_split(tt.dato, default)t
 for xml path, type).value('.','varchar(max)'),1,2,r)
 from tmp001_sep
 )
@@ -225,8 +228,9 @@ t.Total_Gln_Retorno
 from dbo.PROG_EXTRAORD t where t.Id_ProgExtraOrd = @data
 for xml path, type).value('.','varchar(max)'),
 m.dato, g.dato, t1.dato, t2.dato, t3.dato, t4.dato, t5.dato, t6.dato,
-t7.dato, t8.dato, t9.dato, t10.dato, t11.dato, t12.dato, t13.dato)
+t7.dato, t8.dato, t9.dato, t10.dato, t11.dato, t12.dato, t13.dato, t14.dato)
 from tmp001_sep cross apply tmp001_meta m cross apply tmp001_grupos g
+cross apply dbo.udf_detalle_prog_eo_grifo(@data, @Utabla)t14
 outer apply(select*from hlp_TipoCombustible where item=0) t1
 outer apply(select*from hlp_TipoOctanaje where item=0) t2
 outer apply(select*from hlp_TipoDocumento where item=0) t3
