@@ -1,3 +1,10 @@
+declare @Utabla tabla_generico
+insert into @Utabla
+exec dbo.usp_listar_tablas 'dbo.prog_extraord,dbo.prog_ruta,dbo.prog_eo_grifo'
+
+select*from @Utabla
+
+
 -- select*from mastertable('dbo.prog_extraord')
 
 -- delete dbo.prog_ruta where Id_ProgRuta > 39
@@ -13,7 +20,8 @@ select*from dbo.prog_eo_grifo
 
 
 
+-- set language english
 -- insert into prog_eo_grifo(Id_ProgRuta, Id_Grifo, Fec_Abastecimiento, CantidadAbastecimiento, UsuarioI)
 -- select 33,227,'2025-10-11','14','admin' union all
--- select 35,149,'2025-09-16','17','admin' union all
--- select 37,210,'2025-04-01','18','admin'
+-- select 36,149,'2025-09-16','17','admin' union all
+-- select 36,210,'2025-04-01','18','admin'
