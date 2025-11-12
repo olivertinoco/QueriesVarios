@@ -55,22 +55,19 @@ go
 
 
 
+-- ASIGNAR:
+-- ============================================================
+-- const { selectedItems } = useSelectStore.getState();
+-- if (!selectedItems || selectedItems.length === 0) return;
+-- const elementoSeleccionado = selectedItems[0];
 
 
+-- ALMACENAR:
+-- ============================================================
+-- const { setSelectedItems } = useSelectStore.getState();
+-- setSelectedItems([fila]);
 
 
--- declare @data varchar(max)=
--- 't.Id_EOGrifos..*,
--- t.Id_ProgRuta..*,
--- t.Id_Grifo..*,
--- t.Fec_Abastecimiento..*,
--- t.CantidadAbastecimiento..*'
-
--- ,@vartabla varchar(1000) =
--- 't.prog_eo_grifo'
-
-
--- declare @tmp001_tablas tabla_generico
--- insert into @tmp001_tablas
--- exec dbo.usp_listar_tablas
--- 'dbo.prog_eo_grifo'
+-- ELIMINAR:
+-- ============================================================
+-- useSelectStore.setState({ selectedItems: [] });
