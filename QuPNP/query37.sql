@@ -31,8 +31,8 @@ if exists(select 1 from #tmp001_flag where flag = 3)begin
     select @flag = 1
 end
 if(@flag = 1)begin
-    select @data = tt.Id_ProgExtraOrd from #tmp001_claves t,
-    dbo.prog_ruta tt where t.pks = tt.Id_ProgRuta
+    select @data = tt.Id_ProgExtraOrd
+    from #tmp001_claves t, dbo.prog_ruta tt where t.pks = tt.Id_ProgRuta
     exec dbo.usp_listar_prog_rutas @data, @pks
 end
 

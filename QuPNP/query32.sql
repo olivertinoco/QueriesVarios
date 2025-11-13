@@ -53,7 +53,7 @@ exec dbo.usp_lista_hlp_prog_extraOrdinaria @param
 ,tmpAux_metaDataGrifo(dato)as(
 select '~300.23*1****151*701*Nombre del Grifo:*1**2*1*1*1200|300.25*****101*702*Departamento:*1|\
 300.26*****101*703*Provincia:*1|300.27*****101*704*Distrito:*1|\
-300.21*1****101*705*Dotacion (Gln):|300.22*****102*706*Abastecimiento:'
+300.21*1***3*101*705*Dotacion (Gln):|300.22*****102*706*Abastecimiento:'
 )
 ,hlp_TipoCombustible(dato)as(
     select concat(i, 1, (select r, rtrim(Id_TipoCombustible), t, rtrim(DescripcionL)

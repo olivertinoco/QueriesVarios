@@ -58,6 +58,8 @@ go
 
 
 
+
+
 declare @Utabla22 tabla_generico
 insert into @Utabla22
 exec dbo.usp_listar_tablas 'dbo.prog_eo_grifo'
