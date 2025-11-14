@@ -51,23 +51,3 @@ from tmp001_sep
 return
 end
 go
-
-
-
-
--- ASIGNAR:
--- ============================================================
--- const { selectedItems } = useSelectStore.getState();
--- if (!selectedItems || selectedItems.length === 0) return;
--- const elementoSeleccionado = selectedItems[0];
-
-
--- ALMACENAR:
--- ============================================================
--- const { setSelectedItems } = useSelectStore.getState();
--- setSelectedItems([fila]);
-
-
--- ELIMINAR:
--- ============================================================
--- useSelectStore.setState({ selectedItems: [] });

@@ -8,10 +8,24 @@
 -- delete dbo.prog_ruta where Id_ProgRuta > 39
 -- delete dbo.prog_extraord where Id_ProgExtraOrd > 3
 
--- select*from mastertable('dbo.prog_extraord')
--- select*from mastertable('dbo.prog_ruta')
--- select*from mastertable('dbo.prog_eo_grifo')
+set rowcount 10
 
+select t.Id_Vehiculo, tt.DescripcionL, tm.DescripcionL from dbo.vehiculo t
+outer apply(select*from dbo.tipo_marca tt where tt.Id_TipoMarca = t.Id_TipoMarca) tt
+outer apply(select*from dbo.tipo_modelo tm where tm.Id_TipoModelo = t.Id_TipoModelo) tm
+where t.Id_Vehiculo = 335287
+
+
+
+
+return
+select*from mastertable('dbo.vehiculo')
+select*from mastertable('dbo.prog_extraord')
+select*from mastertable('dbo.prog_ruta')
+select*from mastertable('dbo.prog_eo_grifo')
+
+
+return
 select*from dbo.menu
 
 
