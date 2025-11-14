@@ -15,19 +15,28 @@ declare @periodo_intervalo int = -2
 )
 ,tmp001_cab(cab)as(
     select
-    'p1|p2|IdPrgV|IdV|IdCom|IdOct|Placa Interna|Placa Rodaje|Tipo Vehículo|Tipo Combus.|Tipo Octanaje~10|10|10|10|10|10|150|150|300|100|100'
+    'p1|p2|IdPrgV|IdV|IdCom|IdOct|Placa Interna|Placa Rodaje|Tipo Vehículo|Tipo Combus.|Tipo Octanaje|Marca|Modelo~\
+    10|10|10|10|10|10|150|150|300|200|200|250|250'
 )
 ,tmp001_periodo(mes, anno) as(
     select right(100 + month(dateadd(mm, @periodo_intervalo, getdate())), 2), year(dateadd(mm, @periodo_intervalo, getdate()))
 )
-select concat(c.cab, (select r, t.Placa_Interna, t, t.Placa_Interna, t, t.Id_ProgVehiculo, t, t.id_vehiculo, t,
+,hlp001_marcaModelo as(
+    select t.Id_Vehiculo, ltrim(tt.DescripcionL) marca, ltrim(tm.DescripcionL) modelo
+    from dbo.vehiculo t
+    outer apply(select*from dbo.tipo_marca tt where tt.Id_TipoMarca = t.Id_TipoMarca) tt
+    outer apply(select*from dbo.tipo_modelo tm where tm.Id_TipoModelo = t.Id_TipoModelo) tm
+)
+select concat(c.cab, (select r,
+t.Placa_Interna, t, t.Placa_Interna, t, t.Id_ProgVehiculo, t, t.id_vehiculo, t,
 rtrim(t.Id_TipoCombustible), t, t.Id_TipoOctanaje, t, t.Placa_Interna, t, t.Placa_Rodaje, t,
-rtrim(ti.DescripcionL), t, rtrim(tc.DescripcionL), t, rtrim(tg.DescripcionL)
-from dbo.prog_vehiculo t cross apply tmp001_periodo pp
+rtrim(ti.DescripcionL), t, rtrim(tc.DescripcionL), t, rtrim(tg.DescripcionL), t, mo.marca, t, mo.modelo
+from dbo.prog_vehiculo t cross apply tmp001_periodo pp cross apply hlp001_marcaModelo mo
 outer apply(select*from dbo.tipo_vehiculo ti where ti.Id_TipoVehiculo = t.Id_TipoVehiculo)ti
 outer apply(select*from dbo.tipo_combustible tc where tc.Id_TipoCombustible = t.Id_TipoCombustible)tc
 outer apply(select*from dbo.tipo_octanaje tg where tg.Id_TipoOctanaje = t.Id_TipoOctanaje)tg
 where t.Anio = pp.anno and t.mes = pp.mes and t.flag_entrega = 1 and
+t.Id_Vehiculo = mo.Id_Vehiculo and
 t.Placa_Interna like concat('%', rtrim(ltrim(@data)), '%')
 for xml path, type).value('.','varchar(max)'))
 from tmp001_sep, tmp001_cab c
