@@ -101,9 +101,15 @@ select '~300.23*1****151*701*Nombre del Grifo:*1**2*1*1*1200|300.25*****101*702*
     for xml path, type).value('.','varchar(max)'))
     from tmp001_sep
 )
+,hlp001_marcaModelo as(
+    select t.Id_Vehiculo, tt.DescripcionL marca, tm.DescripcionL modelo
+    from dbo.vehiculo t
+    outer apply(select*from dbo.tipo_marca tt where tt.Id_TipoMarca = t.Id_TipoMarca) tt
+    outer apply(select*from dbo.tipo_modelo tm where tm.Id_TipoModelo = t.Id_TipoModelo) tm
+)
 ,hlp_TipoGrado(dato)as(
     select concat(i, 6, (select r, Id_TipoGrado, t, rtrim(DescripcionL)
-    from dbo.tipo_grado -- where activo = 1 and estado = 1
+    from dbo.tipo_grado
     for xml path, type).value('.','varchar(max)'))
     from tmp001_sep
 )
@@ -169,7 +175,8 @@ select concat(dato,
 100.6*****151*993*UNIDAD:*1*4+26*2*1*6|100.7*****101*30*Departamento:*1*4+27|\
 100.8*****101*31*Provincia:*1*4+28|100.9*****101*32*Distrito:*1*4+29|\
 100.10*****111*4*Tipo Movimiento:**4+30|100.11*****101*34*Observación:**4+31*2|\
-100.12**1***101*35*Dias Permanencia :**4+32')
+100.12**1***101*35*Dias Permanencia :**4+32|\
+100.20*****101*81*Marca :*1*1+4.1|100.21*****101*82*Modelo :*1*1+4.2')
 from dbo.udf_general_metadata(
 't.Id_ProgExtraOrd..*100*10***0+1,
 t.Id_ProgVehiculo..*100*11***0+2,
@@ -224,8 +231,11 @@ t.Id_UnidadSolicitante,t,
 t.Recorrido_Ida,t,
 t.Recorrido_Retorno,t,
 t.Total_Gln_Ida,t,
-t.Total_Gln_Retorno
-from dbo.PROG_EXTRAORD t where t.Id_ProgExtraOrd = @data
+t.Total_Gln_Retorno,t,
+tt.marca, t,
+tt.modelo
+from dbo.PROG_EXTRAORD t, hlp001_marcaModelo tt
+where t.Id_Vehiculo = tt.Id_Vehiculo and t.Id_ProgExtraOrd = @data
 for xml path, type).value('.','varchar(max)'),
 m.dato, g.dato, t1.dato, t2.dato, t3.dato, t4.dato, t5.dato, t6.dato,
 t7.dato, t8.dato, t9.dato, t10.dato, t11.dato, t12.dato, t13.dato, t14.dato)
@@ -252,17 +262,13 @@ end catch
 end
 go
 
-exec dbo.usp_crud_prog_extraOrdinaria '0'
--- exec dbo.usp_crud_prog_extraOrdinaria 'zz|3'
+-- exec dbo.usp_crud_prog_extraOrdinaria '0'
+exec dbo.usp_crud_prog_extraOrdinaria 'zz|3'
 
 
 return
 select*from dbo.prog_ruta
 select*from dbo.mastertable('dbo.prog_ruta')
-
--- select*from mastertable('dbo.PROG_EXTRAORD') order by column_id
-
-
 
 
 -- return
@@ -274,10 +280,6 @@ select*from dbo.mastertable('dbo.prog_ruta')
 -- select*from dbo.menuTransportes
 
 
-
-
-
-
 return
 set rowcount 20
 
@@ -286,12 +288,6 @@ select Id_TipoOctanaje, DescripcionL from dbo.TIPO_OCTANAJE
 select*from dbo.TIPO_DOCUMENTO
 select*from dbo.UNIDAD
 select*from dbo.MasterPNP
-
-
--- select*from mastertable('dbo.PROG_VEHICULO') order by column_id
--- select*from mastertable('dbo.VEHICULO') order by column_id
-
-
 
 
 -- select*from dbo.PROG_RUTA
