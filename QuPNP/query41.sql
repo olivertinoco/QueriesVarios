@@ -1,45 +1,49 @@
--- declare @Utabla22 tabla_generico
--- insert into @Utabla22
--- exec dbo.usp_listar_tablas 'dbo.prog_eo_grifo'
--- select*from @Utabla22
+if exists(select 1 from sys.sysobjects where id=object_id('dbo.usp_busqueda_prog_ord_extra','p'))
+drop procedure dbo.usp_busqueda_prog_ord_extra
+go
+create procedure dbo.usp_busqueda_prog_ord_extra
+as
+begin
+begin try
+set nocount on
+set language english
 
--- select*from dbo.menuTransportes
+;with tmp001_sep(t,r,i)as(
+    select*from(values('|','~','^'))t(sepCampo,sepReg,sepLst)
+)
+,hlp_TipoDocumento(dato)as(
+    select concat(i, 81, (select r, Id_TipoDocumento, t, rtrim(DescripcionL)
+    from dbo.TIPO_DOCUMENTO where activo = 1 and estado = 1 order by 2
+    for xml path, type).value('.','varchar(max)'))
+    from tmp001_sep
+)
+select concat(r, '400.1*****111*81*Tipo Documento :|400.2****20*101*82*Nro. Documento :|\
+400.3****50*101*83*Nro. Orden Comisión:|400.4*****102*84*Fecha Inicio Comisión|\
+400.5*****102*85*Fecha Final Comisión', t.dato)
+from tmp001_sep, hlp_TipoDocumento t
 
--- delete dbo.prog_ruta where Id_ProgRuta > 39
--- delete dbo.prog_extraord where Id_ProgExtraOrd > 3
+end try
+begin catch
+    select concat('error:', error_message())
+end catch
+end
+go
 
-set rowcount 10
-
-select t.Id_Vehiculo, tt.DescripcionL, tm.DescripcionL from dbo.vehiculo t
-outer apply(select*from dbo.tipo_marca tt where tt.Id_TipoMarca = t.Id_TipoMarca) tt
-outer apply(select*from dbo.tipo_modelo tm where tm.Id_TipoModelo = t.Id_TipoModelo) tm
-where t.Id_Vehiculo = 335287
-
+exec dbo.usp_busqueda_prog_ord_extra
 
 
 
-return
-select*from mastertable('dbo.vehiculo')
+
 select*from mastertable('dbo.prog_extraord')
-select*from mastertable('dbo.prog_ruta')
-select*from mastertable('dbo.prog_eo_grifo')
-
 
 return
 select*from dbo.menu
-
+select*from dbo.menuTransportes
 
 select*from dbo.prog_extraord
 select*from dbo.prog_ruta
 select*from dbo.prog_eo_grifo where Id_ProgRuta = 33 and activo = 1
 
--- alter table dbo.prog_eo_grifo alter column CIP_Conductor varchar(10)
--- select*from mastertable('dbo.prog_eo_grifo')
-
-
-
--- set language english
--- insert into prog_eo_grifo(Id_ProgRuta, Id_Grifo, Fec_Abastecimiento, CantidadAbastecimiento, UsuarioI)
--- select 33,227,'2025-10-11','14','admin' union all
--- select 36,149,'2025-09-16','17','admin' union all
--- select 36,210,'2025-04-01','18','admin'
+select*from mastertable('dbo.prog_extraord')
+select*from mastertable('dbo.prog_ruta')
+select*from mastertable('dbo.prog_eo_grifo')

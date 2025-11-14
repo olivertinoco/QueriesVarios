@@ -1,5 +1,103 @@
 // el hijo:
+USANDO: synthetic Events
+========================
+(full reactivo los 2 primeros)
+se solicita:
+- lista de Synthetic Events
+- lista de propiedades del DOM accedidas a traves de Synthetic Events
+
+
 function Input({ label, value, onChange, required, error }) {
+  // Estado interno que se sincroniza con el value externo
+  const [valor, setValor] = useState(value ?? "");
+  // Cada vez que el padre cambia "value", actualizamos el interno
+  useEffect(() => {
+    setValor(value ?? "");
+  }, [value]);
+
+  const numero = Number(valor);
+  const entero = Math.trunc(numero);
+
+  const handleChange = (e) => {
+    const nuevoValor = e.target.value;
+    // 1. Actualiza estado interno (UI inmediata)
+    setValor(nuevoValor);
+    // 2. Notifica al padre, si lo envía
+    onChange?.(nuevoValor);
+  };
+
+  return (
+    <div>
+      <label>{label}</label>
+      <input
+        value={valor}           // controlado por estado interno
+        onChange={handleChange} // puente DOM → estado → padre
+        className={error ? "border-red-500" : ""}
+      />
+      {required && error && (
+        <span className="text-red-500">{entero}</span>
+      )}
+    </div>
+  );
+}
+
+
+function Input({ label, value, onChange, required, error }) {
+  const numero = Number(value);
+  const entero = Math.trunc(numero);
+
+  return (
+    <div>
+      <label>{label}</label>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={error ? "border-red-500" : ""}
+      />
+
+      {required && error && (
+        <span className="text-red-500">{entero}</span>
+      )}
+    </div>
+  );
+}
+
+
+
+function Input({ label, value, onChange, required, error }) {
+  const [valor, setValor] = useState("4.1");
+
+  const numero = Number(valor);
+  const entero = Math.trunc(numero);
+
+  return (
+    <div>
+      <label>{label}</label>
+      <input
+        value={value}
+        onChange={(e) => setValor(e.target.value)}
+        className={error ? "border-red-500" : ""}
+      />
+      {required && error && (
+        <span className="text-red-500">{entero}</span>
+      )}
+    </div>
+  );
+}
+
+
+
+
+function Input({ label, value, onChange, required, error }) {
+  const [valor, setValor] = useState("4.1");
+
+  const numero = Number(valor);
+  const entero = Math.trunc(numero);
+
+  const onChange = (e)=>{
+    setValor(e)
+  }
+
   return (
     <div>
       <label>{label}</label>
@@ -9,11 +107,15 @@ function Input({ label, value, onChange, required, error }) {
         className={error ? "border-red-500" : ""}
       />
       {required && error && (
-        <span className="text-red-500">Campo requerido</span>
+        <span className="text-red-500">{entero}</span>
       )}
     </div>
   );
 }
+
+
+
+
 
 // el padre
 function Formulario() {

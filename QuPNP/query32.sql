@@ -39,7 +39,7 @@ exec dbo.usp_lista_hlp_prog_extraOrdinaria @param
     select*,@item from(values('|','~','^','*'))t(sepCampo,sepReg,sepLst,sepAux)
 )
 ,tmpAux_placaVehiculo(dato)as(
-    select '~300.0*0****101**Placa Interna:~11|2*12|3*7|7*1|4*2|5'
+    select '~300.0*0****101**Placa Interna:~11|2*12|3*7|7*1|4*2|5*81|11*82|12'
 )
 ,tmpAux_unidadSolicita(dato)as(
     select '~300.1*0****101**Unidad Destino:***3~26|3*27|4*28|5'
@@ -102,7 +102,7 @@ select '~300.23*1****151*701*Nombre del Grifo:*1**2*1*1*1200|300.25*****101*702*
     from tmp001_sep
 )
 ,hlp001_marcaModelo as(
-    select t.Id_Vehiculo, tt.DescripcionL marca, tm.DescripcionL modelo
+    select t.Id_Vehiculo, ltrim(tt.DescripcionL) marca, ltrim(tm.DescripcionL) modelo
     from dbo.vehiculo t
     outer apply(select*from dbo.tipo_marca tt where tt.Id_TipoMarca = t.Id_TipoMarca) tt
     outer apply(select*from dbo.tipo_modelo tm where tm.Id_TipoModelo = t.Id_TipoModelo) tm
@@ -170,13 +170,13 @@ from tmp001_sep
 )
 ,tmp001_meta(dato)as(
 select concat(dato,
-'|100.2*****101*26*Departamento:*1*2+6|100.3*****101*27*Provincia:*1*2+7|\
+'|100.20*****101*81*Marca :*1*1+4.1|100.21*****101*82*Modelo :*1*1+4.2|\
+100.2*****101*26*Departamento:*1*2+6|100.3*****101*27*Provincia:*1*2+7|\
 100.4*****101*28*Distrito:*1*2+8|100.5*****101*29*Nombres y Apellidos:*1*3+25*2|\
 100.6*****151*993*UNIDAD:*1*4+26*2*1*6|100.7*****101*30*Departamento:*1*4+27|\
 100.8*****101*31*Provincia:*1*4+28|100.9*****101*32*Distrito:*1*4+29|\
 100.10*****111*4*Tipo Movimiento:**4+30|100.11*****101*34*Observación:**4+31*2|\
-100.12**1***101*35*Dias Permanencia :**4+32|\
-100.20*****101*81*Marca :*1*1+4.1|100.21*****101*82*Modelo :*1*1+4.2')
+100.12**1***101*35*Dias Permanencia :**4+32')
 from dbo.udf_general_metadata(
 't.Id_ProgExtraOrd..*100*10***0+1,
 t.Id_ProgVehiculo..*100*11***0+2,
