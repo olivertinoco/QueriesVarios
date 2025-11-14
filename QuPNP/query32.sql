@@ -45,7 +45,7 @@ exec dbo.usp_lista_hlp_prog_extraOrdinaria @param
     select '~300.1*0****101**Unidad Destino:***3~26|3*27|4*28|5'
 )
 ,tmpAux_unidad(dato)as(
-    select '~400.0*0****101**Unidad Destino:***3~30|3*31|4*32|5'
+    select '~400.0*0****101**Unidad:***3~30|3*31|4*32|5'
 )
 ,tmpAux_cipConductor(dato)as(
     select '~300.6*0*1***101**CIP del Conductor:~6|2*29|4'
@@ -53,7 +53,7 @@ exec dbo.usp_lista_hlp_prog_extraOrdinaria @param
 ,tmpAux_metaDataGrifo(dato)as(
 select '~300.23*1****151*701*Nombre del Grifo:*1**2*1*1*1200|300.25*****101*702*Departamento:*1|\
 300.26*****101*703*Provincia:*1|300.27*****101*704*Distrito:*1|\
-300.21*1***3*101*705*Dotacion (Gln):|300.22*****102*706*Abastecimiento:'
+300.21*1***3*101*705*Dotación (Gln):|300.22*****102*706*Abastecimiento:'
 )
 ,hlp_TipoCombustible(dato)as(
     select concat(i, 1, (select r, rtrim(Id_TipoCombustible), t, rtrim(DescripcionL)
@@ -95,7 +95,7 @@ select '~300.23*1****151*701*Nombre del Grifo:*1**2*1*1*1200|300.25*****101*702*
 )
 ,hlp_TipoProgramacion(dato)as(
     select concat(i, 5, (select r, id, t, descr
-    from(values(1, 'Programacion Ordinaria'),(2, 'Programacion ExtraOrdinaria'))t(id,descr)
+    from(values(1, 'Programación Ordinaria'),(2, 'Programación ExtraOrdinaria'))t(id,descr)
     outer apply(select*from(values(1))tt(item) where tt.item = t.id)tt
     order by tt.item desc, t.descr
     for xml path, type).value('.','varchar(max)'))
@@ -168,12 +168,12 @@ select concat(dato,
 100.4*****101*28*Distrito:*1*2+8|100.5*****101*29*Nombres y Apellidos:*1*3+25*2|\
 100.6*****151*993*UNIDAD:*1*4+26*2*1*6|100.7*****101*30*Departamento:*1*4+27|\
 100.8*****101*31*Provincia:*1*4+28|100.9*****101*32*Distrito:*1*4+29|\
-100.10*****111*4*Tipo Movimiento:**4+30|100.11*****101*34*Observacion :**4+31*2|\
+100.10*****111*4*Tipo Movimiento:**4+30|100.11*****101*34*Observación:**4+31*2|\
 100.12**1***101*35*Dias Permanencia :**4+32')
 from dbo.udf_general_metadata(
 't.Id_ProgExtraOrd..*100*10***0+1,
 t.Id_ProgVehiculo..*100*11***0+2,
-t.Id_TipoProgramacion..*111*5*Tipo Programacion:**0+0**1,
+t.Id_TipoProgramacion..*111*5*Tipo Programación:**0+0**1,
 t.Id_Vehiculo..*100*12***0+3,
 t.Placa_Interna..*151*990*Placa Interna:*1*1+1**1*6,
 t.Placa_Rodaje..*101*7*Placa Rodaje:*1*1+2,
@@ -182,13 +182,13 @@ t.Id_TipoOctanaje..*111*2*Octanaje:*1*1+4,
 t.Id_TipoDocumento..*111*3*Documento:**2+9,
 t.Nro_Documento..*101*13*Nro Documento:**2+10,
 t.Fec_Documento..*102*14*Fecha Documento:**2+11,
-t.Nro_OrdenComision..*101*15*Nro Ord Comision:**2+14,
-t.Fec_OrdenComision..*102*16*Fecha Ord Comision:**2+15,
+t.Nro_OrdenComision..*101*15*Nro Ord Comisión:**2+14,
+t.Fec_OrdenComision..*102*16*Fecha Ord Comisión:**2+15,
 t.CapacidadTanque..*101*17*Capacidad Tanque:**2+12,
 t.RxGln..*101*18*Nro Galones:**2+13,
-t.Fec_InicioComision..*102*19*Fecha Inicio Comision:**2+16,
-t.Fec_TerminoComision..*102*20*Fecha Termino Comision:**2+17,
-t.Motivo_Comision..*101*21*Motivo Comision:**2+18*3,
+t.Fec_InicioComision..*102*19*Fecha Inicio Comisión:**2+16,
+t.Fec_TerminoComision..*102*20*Fecha Termino Comisión:**2+17,
+t.Motivo_Comision..*101*21*Motivo Comisión:**2+18*3,
 t.CIP_Conductor..*151*992*CIP Conductor:*1*3+23**1*3,
 t.Grado_Conductor..*111*6*Grado Conductor:*1*3+24,
 t.Id_UnidadSolicitante..*151*991*Unidad Solicitante:*1*2+5*3*1*6,
