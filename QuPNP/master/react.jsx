@@ -201,6 +201,11 @@ const { selectedItems } = useSelectStore.getState();
 if (!selectedItems || selectedItems.length === 0) return;
 const elementoSeleccionado = selectedItems[0];
 
+o asi:
+
+const selectedItems = useSelectStore((state) => state.selectedItems);
+if (!selectedItems || selectedItems.length === 0) return;
+const elementoSeleccionado = selectedItems[0];
 
 ALMACENAR:
 ============================================================
@@ -211,3 +216,6 @@ setSelectedItems([fila]);
 ELIMINAR:
 ============================================================
 useSelectStore.setState({ selectedItems: [] });
+
+
+yt-dlp --merge-output-format mp4 --extractor-args "youtube:player_client=android" URL

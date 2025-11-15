@@ -1,8 +1,15 @@
-;with hlp001_marcaModelo as(
-    select t.Id_Vehiculo, tt.DescripcionL marca, tm.DescripcionL modelo
-    from dbo.vehiculo t
-    outer apply(select*from dbo.tipo_marca tt where tt.Id_TipoMarca = t.Id_TipoMarca) tt
-    outer apply(select*from dbo.tipo_modelo tm where tm.Id_TipoModelo = t.Id_TipoModelo) tm
-)
-select tt.*from prog_extraord t, hlp001_marcaModelo tt
-where t.Id_Vehiculo = tt.Id_Vehiculo and t.Id_ProgExtraOrd = 3
+
+
+
+
+return
+select*from dbo.menu
+select*from dbo.menuTransportes
+
+select*from dbo.prog_extraord
+select*from dbo.prog_ruta
+select*from dbo.prog_eo_grifo where Id_ProgRuta = 33 and activo = 1
+
+select*from mastertable('dbo.prog_extraord')
+select*from mastertable('dbo.prog_ruta')
+select*from mastertable('dbo.prog_eo_grifo')
