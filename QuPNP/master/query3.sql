@@ -38,3 +38,22 @@ declare @data varchar(max) =
 
 select @data = dato from dbo.udf_splice(@data, default, default)
 exec(@data)
+
+
+if exists(select 1 from sys.sysobjects where id=object_id('dbo.hlp_campos','if'))
+drop function dbo.hlp_campos
+go
+create function dbo.hlp_campos(
+    @tabla varchar(200)
+)returns table as return(
+    select stuff((select ', ', name from sys.columns
+    where object_id = object_id(@tabla) order by column_id
+    for xml path, type).value('.', 'varchar(max)'),1,1,'') dato
+)
+go
+
+declare @tabla varchar(200) ='dbo.vehiculo'
+declare @tabla2 varchar(200) ='vehiculo'
+
+select dato from dbo.hlp_campos(@tabla)
+select dato from dbo.hlp_campos(@tabla2)
