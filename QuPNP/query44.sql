@@ -1,58 +1,58 @@
--- select *from sys.tables order by 1
--- alter table dbo.PROG_TARJETA_MULTIFLOTA add UsuarioI varchar(20)
--- alter table dbo.PROG_TARJETA_MULTIFLOTA add FechaI datetime default getdate()
--- exec sp_rename 'dbo.PROG_TARJETA_MULTIFLOTA.Fec_cancelación', 'Fec_cancelacion', 'column';
+if exists(select 1 from sys.sysobjects where id=object_id('dbo.usp_generico_grabar_tarjeta_multiflota','p'))
+drop procedure dbo.usp_generico_grabar_tarjeta_multiflota
+go
+create procedure dbo.usp_generico_grabar_tarjeta_multiflota
+@data varchar(max)
+as
+begin
+begin try
+set nocount on
+set language english
+declare
+@tempGlob varchar(200) = replace(convert(varchar(36), newid()), '-','_')
+select top 0 cast(null as int) id_multiflota into #tmp001_salida
 
--- insert into dbo.mastertablas
--- select 7, 'dbo.prog_tarjeta_multiflota'
+exec dbo.usp_crud_generico01 @data, @tempGlob
 
--- select*from tipo_vehiculo
--- select*from tipo_octanaje
+insert into #tmp001_salida
+exec('select*from ##tmp001_salida' + @tempGlob)
 
--- insert into dbo.menu
--- select '010300', 'Tarjeta Multiflota', 'ProgTarjetaMultiflota'
+;with tmp001_sep(t,r,i,a)as(
+    select*from(values('|','~','^','*'))t(sepCampo,sepReg,sepLst,sepAux)
+)
+,tmp001_vehiculo as(
+    select t.id_vehiculo veh, t.id_multiflota id
+    from dbo.PROG_TARJETA_MULTIFLOTA t, #tmp001_salida tt
+    where t.id_multiflota = tt.id_multiflota
+)
+,tmp001_cab(dato)as(
+    select 'NRO TARJETA|FECHA ACTIVACION|FECHA CANCELACION|ESTADO~400|200|200|200'
+)
+select concat(v.id, i, c.dato, (select r, Nro_Tarjeta, t,
+convert(varchar, Fec_Activacion, 23), t,
+convert(varchar, case when Fec_Cancelacion != cast('' as date) then Fec_Cancelacion end, 23), t,
+case activo when 1 then 'Act' else 'Desc' end
+from dbo.PROG_TARJETA_MULTIFLOTA where Id_Vehiculo = v.veh
+order by Id_Multiflota desc
+for xml path, type).value('.', 'varchar(max)'))
+from tmp001_sep, tmp001_vehiculo v, tmp001_cab c
+
+end try
+begin catch
+    select concat('error:', error_message())
+end catch
+end
+go
 
 
--- ;with tmp001_sec as(
---     select top 10 row_number()over(order by (select 1)) item from dbo.vehiculo
--- )
--- insert into dbo.PROG_TARJETA_MULTIFLOTA(id_vehiculo, placa_interna, placa_rodaje,Nro_Tarjeta,Fec_Activacion,Fec_cancelacion,Activo)
--- select id_vehiculo, placa_interna, placa_rodaje, left(replace(newid(), '-', ''), 30),
--- dateadd(dd, item, getdate()), dateadd(hh, 5, dateadd(dd, item, getdate())), 0
--- from dbo.vehiculo, tmp001_sec where id_vehiculo = 353253
-
--- update t set activo = 1, Fec_cancelacion = null from dbo.PROG_TARJETA_MULTIFLOTA t where Id_Multiflota = 10
--- update t set usuarioI = 'ADMIN' from dbo.PROG_TARJETA_MULTIFLOTA t
 
 
+
+declare @data varchar(max)
+-- ='1457~350352||PRUEBA-KS-SS|2025-11-19|1|PL-10543|EPA-514|7.2|7.1|7.5|7.6|7.8|7.3|7.4'
+='1457~350352|13|2025-11-19|0|7.2|7.1|7.7|7.8'
+-- ='1457~350352|13||1|7.2|7.1|7.7|7.8'
+
+exec dbo.usp_generico_grabar_tarjeta_multiflota @data
 
 select*from dbo.PROG_TARJETA_MULTIFLOTA
-where id_vehiculo = 353253
-order by Id_Multiflota desc offset 0 rows fetch first 1 row only
-
-
-select*from dbo.mastertable('dbo.PROG_TARJETA_MULTIFLOTA')
-
-
-declare @Utabla tabla_generico
-insert into @Utabla
-exec dbo.usp_listar_tablas 'dbo.prog_tarjeta_multiflota'
-select*from @Utabla
-
-
-
-return
-select*from dbo.menu
-select*from dbo.menuTransportes
-
-select*from dbo.prog_extraord
-select*from dbo.prog_ruta
-select*from dbo.prog_eo_grifo where Id_ProgRuta = 33 and activo = 1
-
-select*from mastertable('dbo.prog_extraord')
-select*from mastertable('dbo.prog_ruta')
-select*from mastertable('dbo.prog_eo_grifo')
-
-
-select*From dbo.masterAudit
-select*From dbo.mastertablas

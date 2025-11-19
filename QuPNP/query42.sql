@@ -44,11 +44,12 @@ exec dbo.usp_listar_tablas 'dbo.prog_tarjeta_multiflota'
     outer apply(select*from dbo.tipo_octanaje toc where toc.Id_TipoOctanaje = t.Id_TipoOctanaje) toc
 )
 ,tmp001_cab(dato)as(
-    select '~NRO TARJETA|FECHA ACTIVACION|FECHA CANCELACION|ACTIVO~400|200|200|200'
+    select '~NRO TARJETA|FECHA ACTIVACION|FECHA CANCELACION|ESTADO~400|200|200|200'
 )
 ,tmp001_detalle_tarj_multiflota(dato)as(
     select concat(i, 18, c.dato, (select r, Nro_Tarjeta, t,
-    convert(varchar, Fec_Activacion, 23), t, convert(varchar, Fec_cancelacion, 23), t,
+    convert(varchar, Fec_Activacion, 23), t,
+    convert(varchar, case when Fec_Cancelacion != cast('' as date) then Fec_Cancelacion end, 23), t,
     case activo when 1 then 'Act' else 'Desc' end
     from dbo.PROG_TARJETA_MULTIFLOTA where Id_Vehiculo = @data
     order by Id_Multiflota desc
@@ -84,7 +85,7 @@ t.Placa_Interna, t,
 t.Placa_Rodaje, t,
 t.Nro_Tarjeta, t,
 convert(varchar, t.Fec_Activacion, 23), t,
-convert(varchar, t.Fec_Cancelacion, 23), t,
+convert(varchar, case when t.Fec_Cancelacion != cast('' as date) then t.Fec_Cancelacion end, 23), t,
 t.Activo, t,
 tt.marca, t, tt.modelo, t, tt.tipovh, t, tt.octanaje
 from dbo.prog_tarjeta_multiflota t, hlp001_marcaModelo tt
