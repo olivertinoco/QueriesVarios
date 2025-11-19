@@ -13,15 +13,32 @@
 -- select '010300', 'Tarjeta Multiflota', 'ProgTarjetaMultiflota'
 
 
-select*from dbo.vehiculo where id_vehiculo = 365182
+-- ;with tmp001_sec as(
+--     select top 10 row_number()over(order by (select 1)) item from dbo.vehiculo
+-- )
+-- insert into dbo.PROG_TARJETA_MULTIFLOTA(id_vehiculo, placa_interna, placa_rodaje,Nro_Tarjeta,Fec_Activacion,Fec_cancelacion,Activo)
+-- select id_vehiculo, placa_interna, placa_rodaje, left(replace(newid(), '-', ''), 30),
+-- dateadd(dd, item, getdate()), dateadd(hh, 5, dateadd(dd, item, getdate())), 0
+-- from dbo.vehiculo, tmp001_sec where id_vehiculo = 353253
+
+-- update t set activo = 1, Fec_cancelacion = null from dbo.PROG_TARJETA_MULTIFLOTA t where Id_Multiflota = 10
+-- update t set usuarioI = 'ADMIN' from dbo.PROG_TARJETA_MULTIFLOTA t
 
 
 
+select*from dbo.PROG_TARJETA_MULTIFLOTA
+where id_vehiculo = 353253
+order by Id_Multiflota desc offset 0 rows fetch first 1 row only
 
 
 select*from dbo.mastertable('dbo.PROG_TARJETA_MULTIFLOTA')
 
--- select*from dbo.mastertable('dbo.PROG_EXTRAORD')
+
+declare @Utabla tabla_generico
+insert into @Utabla
+exec dbo.usp_listar_tablas 'dbo.prog_tarjeta_multiflota'
+select*from @Utabla
+
 
 
 return
