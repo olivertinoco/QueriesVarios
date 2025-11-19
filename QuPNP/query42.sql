@@ -43,6 +43,18 @@ exec dbo.usp_listar_tablas 'dbo.prog_tarjeta_multiflota'
     outer apply(select*from dbo.tipo_vehiculo tv where tv.Id_TipoVehiculo = t.Id_TipoVehiculo) tv
     outer apply(select*from dbo.tipo_octanaje toc where toc.Id_TipoOctanaje = t.Id_TipoOctanaje) toc
 )
+,tmp001_cab(dato)as(
+    select '~NRO TARJETA|FECHA ACTIVACION|FECHA CANCELACION|ACTIVO~400|200|200|200'
+)
+,tmp001_detalle_tarj_multiflota(dato)as(
+    select concat(i, 18, c.dato, (select r, Nro_Tarjeta, t,
+    convert(varchar, Fec_Activacion, 23), t, convert(varchar, Fec_cancelacion, 23), t,
+    case activo when 1 then 'Act' else 'Desc' end
+    from dbo.PROG_TARJETA_MULTIFLOTA where Id_Vehiculo = @data
+    order by Id_Multiflota desc
+    for xml path, type).value('.', 'varchar(max)'))
+    from tmp001_sep, tmp001_cab c
+)
 ,tmp001_grupos(dato)as(
     select stuff((select t, grupo, a, descr from(values
     (0,'DATOS VEHICULO :'), (1,'DATOS DE TARJETA :'))t(grupo,descr)
@@ -54,12 +66,12 @@ select concat(dato,
 '|100.20*****101*81*Marca :*1*0+4.1|100.21*****101*82*Modelo :*1*0+4.2|\
 100.22*****101*83*Tipo Vehículo:*1*0+4.3|100.23*****101*84*Tipo Octanaje:*1*0+4.4')
 from dbo.udf_general_metadata(
-'t.Id_Multiflota..*100*10,
-t.Id_Vehiculo..*100*11,
-t.Placa_Interna..*151*990*Placa Interna :*1*0+3**1*1,
+'t.Id_Multiflota..*100*10***0+55*****1,
+t.Id_Vehiculo..*100*11***0+56*****1,
+t.Placa_Interna.0.*151*990*Placa Interna :*1*0+3**1*1,
 t.Placa_Rodaje..*151*991*Placa Rodaje :*1*0+4**1*1,
-t.Nro_Tarjeta..*101*2*Nro Tarjeta :**1+5,
-t.Fec_Activacion..*101*3*Fecha Activacion :*1*1+6,
+t.Nro_Tarjeta.0.*101*2*Nro Tarjeta :**1+5,
+t.Fec_Activacion.0.*101*3*Fecha Activacion :*1*1+6,
 t.Fec_Cancelacion..*101*4*Fecha Cancelación :*1*1+7,
 t.Activo..*103*5*Activo :**1+8',
 't.dbo.prog_tarjeta_multiflota',
@@ -76,13 +88,15 @@ convert(varchar, t.Fec_Cancelacion, 23), t,
 t.Activo, t,
 tt.marca, t, tt.modelo, t, tt.tipovh, t, tt.octanaje
 from dbo.prog_tarjeta_multiflota t, hlp001_marcaModelo tt
-where t.Id_Vehiculo = tt.Id_Vehiculo and t.activo = 1 and t.estado = 1 and
-t.Id_Multiflota = @data
+where t.Id_Vehiculo = tt.Id_Vehiculo and estado = 1 and
+t.Id_Vehiculo = @data
+order by Id_Multiflota desc offset 0 rows fetch first 1 row only
 for xml path, type).value('.', 'varchar(max)'),
-m.dato, g.dato, t1.dato, t2.dato)
+m.dato, g.dato, t1.dato, t2.dato, t3.dato)
 from tmp001_sep cross apply tmp001_meta m cross apply tmp001_grupos g
 outer apply(select*from tmpAux_placaVehiculo where item=0) t1
 outer apply(select*from tmpAux_placaRodaje where item=0) t2
+outer apply(select*from tmp001_detalle_tarj_multiflota where item=1) t3
 
 end try
 begin catch
@@ -93,7 +107,8 @@ go
 
 
 declare @data varchar(100)
--- = 'zz|23'
-=0
+= 0
+-- = 'zz|353253'
+
 
 exec dbo.usp_listar_vehiculo_tarjeta_multiflota @data

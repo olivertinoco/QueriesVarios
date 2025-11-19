@@ -49,8 +49,8 @@ end
 go
 
 
-declare @data varchar(100)
+declare @datas varchar(100)
 -- ='cm|'
 = '|lie'
 
-exec dbo.usp_buscar_vehiculo_tarjeta_multiflota @data
+exec dbo.usp_buscar_vehiculo_tarjeta_multiflota @datas
