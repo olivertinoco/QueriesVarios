@@ -8,9 +8,19 @@ begin
 begin try
 set nocount on
 set language english
+declare @Utabla tabla_generico
 declare
 @tempGlob varchar(200) = replace(convert(varchar(36), newid()), '-','_')
 select top 0 cast(null as int) id_multiflota into #tmp001_salida
+
+insert into @Utabla
+exec dbo.usp_listar_tablas 'dbo.PROG_TARJETA_MULTIFLOTA'
+
+if exists(select 1 from dbo.udf_duplicado_tarjeta_multiflota(@data, @Utabla) where dato = 1)
+begin
+    select 'duplicado' dato
+    return
+end
 
 exec dbo.usp_crud_generico01 @data, @tempGlob
 
@@ -55,4 +65,5 @@ declare @data varchar(max)
 
 exec dbo.usp_generico_grabar_tarjeta_multiflota @data
 
-select*from dbo.PROG_TARJETA_MULTIFLOTA
+
+-- select*from dbo.PROG_TARJETA_MULTIFLOTA
