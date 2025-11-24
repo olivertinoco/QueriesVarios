@@ -92,7 +92,7 @@ declare @data varchar(max) =
 -- set identity_insert dbo.PROG_TARJETA_MULTIFLOTA off
 
 
-
 select t.*
 from dbo.PROG_TARJETA_MULTIFLOTA t
-order by Id_Vehiculo, Id_Multiflota
+-- where Placa_Interna = 'CMD-2020'
+order by Id_Multiflota desc, Id_Vehiculo
