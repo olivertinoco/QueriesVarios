@@ -9,16 +9,18 @@ begin try
 set nocount on
 set language english
 declare @Utabla tabla_generico
-declare
+declare @flag char(1), @dato int,
 @tempGlob varchar(200) = replace(convert(varchar(36), newid()), '-','_')
 select top 0 cast(null as int) id_multiflota into #tmp001_salida
 
 insert into @Utabla
 exec dbo.usp_listar_tablas 'dbo.PROG_TARJETA_MULTIFLOTA'
 
-if exists(select 1 from dbo.udf_duplicado_tarjeta_multiflota(@data, @Utabla) where dato = 1)
+select @dato = dato, @flag = flag from dbo.udf_duplicado_tarjeta_multiflota(@data, @Utabla)
+if (@dato = 1)
 begin
-    select 'duplicado' dato
+    if (@flag = 'D') select 'duplicado' dato
+    if (@flag = 'E') select 'existe' dato
     return
 end
 
