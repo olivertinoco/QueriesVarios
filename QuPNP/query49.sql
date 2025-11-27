@@ -1,43 +1,56 @@
--- insert into dbo.mastertablas
--- select 8, 'dbo.prog_abastecimiento_diario'
-set rowcount 50
+if exists(select 1 from sys.sysobjects where id=object_id('dbo.usp_buscar_prog_abastecimiento_diario_vehiculo','p'))
+drop procedure dbo.usp_buscar_prog_abastecimiento_diario_vehiculo
+go
+create procedure dbo.usp_buscar_prog_abastecimiento_diario_vehiculo
+@data varchar(100)
+as
+begin
+begin try
+set nocount on
+set language english
+declare @periodo_intervalo int = -2
+create table #tmp001_param(
+    interna varchar(50) collate database_default,
+    rodajes varchar(50) collate database_default
+)
+select @data = dato from dbo.udf_splice(@data, default, default)
+insert into #tmp001_param exec(@data)
 
-
-
-select
-t.Id_ProgVehiculo, t.Id_Vehiculo, t.Anio, t.Mes,
-ltrim(tv.DescripcionL) tipovh, ltrim(toc.DescripcionL) tipoComb
-from dbo.prog_vehiculo t
+;with tmp001_sep(t,r,i)as(
+    select*from(values('|','~','^'))t(sepCampo,sepReg,sepLst)
+)
+,tmp001_cab(dato)as(
+    select concat(
+    'a1|PLACA INTERNA|PLACA RODAJE|TARJETA MULTIFLOTA|TIPO VEHICULO|TIPO COMBUSTIBLE|GLNxDIA|GLNXMES', r,
+    '10|200|200|400|450|450|200|200')
+    from tmp001_sep
+)
+,tmp001_periodo(mes, anno) as(
+    select right(100 + month(dateadd(mm, @periodo_intervalo, getdate())), 2),
+    year(dateadd(mm, @periodo_intervalo, getdate()))
+)
+select concat(c.dato, (select r,
+t.Id_ProgVehiculo, t, t.placa_interna, t, t.placa_rodaje, t, tm.nro_tarjeta, t,
+ltrim(tv.DescripcionL), t, ltrim(toc.DescripcionL), t, tt.GlnxDia, t, tt.GlnxMes
+from dbo.prog_vehiculo t cross apply dbo.prog_dotacion tt
+cross apply tmp001_periodo pp
+cross apply #tmp001_param pa
 outer apply(select*from dbo.tipo_vehiculo tv where tv.Id_TipoVehiculo = t.Id_TipoVehiculo) tv
 outer apply(select*from dbo.tipo_combustible toc where toc.Id_TipoCombustible = t.Id_TipoCombustible) toc
--- outer apply(select*from dbo.prog_tarjeta_multiflota)
+outer apply(select top 1 *from dbo.PROG_TARJETA_MULTIFLOTA tm
+where tm.id_vehiculo = t.id_vehiculo and tm.activo = 1 and tm.estado = 1)tm
+where t.Id_ProgVehiculo = tt.Id_ProgVehiculo and pp.anno = t.anio and pp.mes = t.mes and
+t.placa_interna like concat('%', pa.interna, '%') and t.placa_rodaje like concat('%', pa.rodajes, '%')
+for xml path, type).value('.','varchar(max)'))
+from tmp001_sep, tmp001_cab c
 
 
+end try
+begin catch
+    select concat('error:', error_message())
+end catch
+end
+go
 
-
-select*from mastertable('dbo.prog_abastecimiento_diario')
-return
-
--- Id_ProgVehiculo Anio Mes
-select*from dbo.prog_vehiculo
-
-
-
--- Id_ProgDotacion Id_ProgVehiculo Id_Vehiculo GlnxDia    GlnxMes
-select*from dbo.prog_dotacion
-
-return
-
--- Id_Multiflota Nro_Tarjeta
-select*from dbo.prog_tarjeta_multiflota
-
--- Id_TipoCombustible DescripcionL
-select*from dbo.tipo_combustible
-return
-
--- select*from mastertable('dbo.prog_abastecimiento_diario')
--- select*from mastertable('dbo.PROG_DOTACION')
--- select*from mastertable('dbo.prog_tarjeta_multiflota')
--- select*from mastertable('dbo.grifo')
-select*from mastertable('dbo.vehiculo')
-select*from mastertable('dbo.unidad_1') -- coduni
+exec dbo.usp_buscar_prog_abastecimiento_diario_vehiculo '736|'
+exec dbo.usp_buscar_prog_abastecimiento_diario_vehiculo '|736'
