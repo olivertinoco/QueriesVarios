@@ -7,8 +7,7 @@ select*from dbo.prog_vehiculo
 
 
 
--- Id_ProgDotacion Id_ProgVehiculo Id_Vehiculo GlnxDia    GlnxMes
-select*from dbo.prog_dotacion
+select*from mastertable('dbo.prog_abastecimiento_diario')
 
 return
 

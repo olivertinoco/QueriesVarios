@@ -21,8 +21,8 @@ insert into #tmp001_param exec(@data)
 )
 ,tmp001_cab(dato)as(
     select concat(
-    'a1|PLACA INTERNA|PLACA RODAJE|TARJETA MULTIFLOTA|TIPO VEHICULO|TIPO COMBUSTIBLE|GLNxDIA|GLNXMES', r,
-    '10|200|200|400|450|450|200|200')
+    'a1|PLACA INTERNA|PLACA RODAJE|TARJETA MULTIFLOTA|TIPO VEHICULO|TIPO COMBUSTIBLE|GLNxDIA|GLNXMES|ID', r,
+    '10|200|200|400|450|450|200|200|10')
     from tmp001_sep
 )
 ,tmp001_periodo(mes, anno) as(
@@ -31,13 +31,13 @@ insert into #tmp001_param exec(@data)
 )
 select concat(c.dato, (select r,
 t.Id_ProgVehiculo, t, t.placa_interna, t, t.placa_rodaje, t, tm.nro_tarjeta, t,
-ltrim(tv.DescripcionL), t, ltrim(toc.DescripcionL), t, tt.GlnxDia, t, tt.GlnxMes
+ltrim(tv.DescripcionL), t, ltrim(toc.DescripcionL), t, tt.GlnxDia, t, tt.GlnxMes, t, tm.Id_Multiflota
 from dbo.prog_vehiculo t cross apply dbo.prog_dotacion tt
 cross apply tmp001_periodo pp
 cross apply #tmp001_param pa
 outer apply(select*from dbo.tipo_vehiculo tv where tv.Id_TipoVehiculo = t.Id_TipoVehiculo) tv
 outer apply(select*from dbo.tipo_combustible toc where toc.Id_TipoCombustible = t.Id_TipoCombustible) toc
-outer apply(select top 1 *from dbo.PROG_TARJETA_MULTIFLOTA tm
+outer apply(select top 1 *from dbo.prog_tarjeta_multiflota tm
 where tm.id_vehiculo = t.id_vehiculo and tm.activo = 1 and tm.estado = 1)tm
 where t.Id_ProgVehiculo = tt.Id_ProgVehiculo and pp.anno = t.anio and pp.mes = t.mes and
 t.placa_interna like concat('%', pa.interna, '%') and t.placa_rodaje like concat('%', pa.rodajes, '%')
@@ -54,3 +54,6 @@ go
 
 exec dbo.usp_buscar_prog_abastecimiento_diario_vehiculo '736|'
 exec dbo.usp_buscar_prog_abastecimiento_diario_vehiculo '|736'
+
+
+select*from mastertable('dbo.prog_tarjeta_multiflota')
