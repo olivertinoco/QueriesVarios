@@ -39,7 +39,7 @@ exec dbo.usp_listar_tablas 'dbo.prog_abastecimiento_diario'
     where t.Id_ProgVehiculo = tt.Id_ProgVehiculo and pp.anno = t.anio and pp.mes = t.mes
 )
 ,tmp001_annos(dato)as(
-    select concat(i, 1, (select distinct r, anio, t, anio from dbo.prog_vehiculo order by 1 desc
+    select concat(i, 1, r, '2023|2023~2024|2024', (select distinct r, anio, t, anio from dbo.prog_vehiculo order by 1 desc
     for xml path, type).value('.','varchar(max)'))
     from tmp001_sep
 )
@@ -63,11 +63,11 @@ exec dbo.usp_listar_tablas 'dbo.prog_abastecimiento_diario'
 --     from tmp001_sep
 -- )
 ,tmpAux_placaVehiculo(dato)as(
-    select concat(i, 992, r, '300.2*0****101**Placa Interna:', r, '991|2*83|5*84|6*81|3*82|4')
+    select concat(i, 992, r, '300.2*0****101**Placa Interna:', r, '993|2*81|3*82|4*83|5*84|6*85|7')
     from tmp001_sep
 )
 ,tmpAux_placaRodaje(dato)as(
-    select concat(i, 993, r, '300.3*0****101**Placa Rodaje:', r, '990|1*83|5*84|6*81|3*82|4')
+    select concat(i, 993, r, '300.3*0****101**Placa Rodaje:', r, '992|1*81|3*82|4*83|5*84|6*85|7')
     from tmp001_sep
 )
 ,tmp001_cab_grifo(dato)as(
