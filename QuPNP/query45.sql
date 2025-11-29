@@ -6,8 +6,6 @@
 -- insert into dbo.mastertablas
 -- select 7, 'dbo.prog_tarjeta_multiflota'
 
--- select*from tipo_vehiculo
--- select*from tipo_octanaje
 
 -- insert into dbo.menu
 -- select '010300', 'Tarjeta Multiflota', 'ProgTarjetaMultiflota'
@@ -32,20 +30,43 @@
 -- select '060600', 'Códigos Pedidos', 'MtoCodigosPedidos' union all
 -- select '060700', 'Servicio Vehículo LR', 'MtoServiciosVehiculosLR' union all
 -- select '060800', 'Días Feriados', 'MtoDiasFeriados'union all
--- select '060900', 'Planta Grifo', 'MtoProdPlanta' union all
+-- select '060900', 'Planta Grifo', 'MtoProdPlantaGrifo' union all
 -- select '061000', 'Tipo Grifo', 'MtoTipoGrifo' union all
 -- select '061100', 'Tipo Dotación', 'MtoTipoDotacion' union all
 -- select '061200', 'Camiones', 'MtoCamiones' union all
 -- select '061300', 'Conductores Camiones', 'MtoConductoresCamiones'
 
-update t set data_router = 'MtoProdPlantaGrifo'
-from dbo.menu t where id_menu = '060900'
+-- update t set t.descripcion = 'Programación Combustible'
+-- from dbo.menu t
+-- where t.id_menu = '010100'
+
+
+-- update t set t.descripcion = 'Distribución Combustible'
+-- from dbo.menu t
+-- where t.id_menu = '020000'
+
+-- update t set t.data_router = 'ProgExtraordinariaSearch'
+-- from dbo.menu t
+-- where t.id_menu = '020100'
+
+
+-- update t set t.descripcion = 'Adquisición Combustible'
+-- from dbo.menu t
+-- where t.id_menu = '030000'
+
+-- update t set t.descripcion = 'Rendición de Cuentas'
+-- from dbo.menu t
+-- where t.id_menu = '040000'
+
+-- update t set t.descripcion = 'Unidades PNP'
+-- from dbo.menu t
+-- where t.id_menu = '050000'
+
 
 
 select*from dbo.menu order by 1
+select*from dbo.menuTransportes
 
-
-return
 
 select*from dbo.PROG_TARJETA_MULTIFLOTA
 -- where id_vehiculo = 353253
@@ -62,9 +83,7 @@ select*from @Utabla
 
 
 
-return
-select*from dbo.menu
-select*from dbo.menuTransportes
+-- return
 
 select*from dbo.prog_extraord
 select*from dbo.prog_ruta
