@@ -46,11 +46,11 @@ exec dbo.usp_listar_tablas 'dbo.prog_abastecimiento_diario'
 ,tmp001_meses(dato)as(
     select concat(i, 2, (select r,
     right(concat('0', row_number()over(order by (select 1))),2), t, ttt.value
-    from sys.syslanguages t cross apply dbo.udf_split(months,',')ttt
-    outer apply(
-    select 0 item from(values(format(getdate(), 'MMMM', 'es-es')))tt(mes) where tt.mes = ttt.value)tt
+    from sys.syslanguages t cross apply dbo.udf_split(t.months,',')ttt
     where t.alias = 'Spanish'
-    order by isnull(tt.item, 1)
+    -- outer apply(
+    -- select 0 item from(values(format(getdate(), 'MMMM', 'es-es')))tt(mes) where tt.mes = ttt.value)tt
+    -- order by isnull(tt.item, 1)
     for xml path, type).value('.','varchar(max)'))
     from tmp001_sep
 )
@@ -107,28 +107,33 @@ exec dbo.usp_listar_tablas 'dbo.prog_abastecimiento_diario'
     for xml path, type).value('.','varchar(max)'),1,1,r)
     from tmp001_sep
 )
+,tmp001_periodoActual(dato)as(
+    select concat(t, t, t, t, t, anno, t, mes)
+    from(select max(anio) anno, max(mes) mes from dbo.prog_vehiculo group by anio, mes)t,
+    tmp001_sep
+)
 ,tmp001_meta(dato)as(
 select concat(dato,
 '|100.13*****101*81*Nro Tarjeta Multiflota :*1*2+4.1|100.14*****101*82*Tipo Vehiculo :*1*2+4.2|\
-100.15*****101*83*Tipo Combustible :*1*2+4.3|100.16*****101*84*Diario :*1*3+9|\
-100.17*****101*85*Mensual :*1*3+10|100.18*****101*86*Acumulado :*1*4+13')
+100.15*****101*83*Tipo Combustible :*1*2+4.3|100.16*****101*84*Maxima Dotación Diaria :*1*3+9|\
+100.17*****101*85*Maxima Dotación Mensual :*1*3+10|100.18*****101*86*Acumulado Mensual :*1*4+13')
 from dbo.udf_general_metadata(
 't.Id_AbastecimientoDiario..*100*10***0+110*****1,
 t.Id_ProgVehiculo..*100*11***0+111*****1,
 t.Id_Unidad.0.*151*990*Unidad /OO PNP :*1*0+1*3*1*1,
 t.Id_Grifo..*151*771*Estación de Servicio :*1*1+2*2*1*1*1500,
 t.Id_Multiflota..*100*12***0+112*****1,
-t.Anio..*111*1*Año :**2+5**1,
-t.Mes..*111*2*Mes :**2+6**1,
+t.Anio..*111*1*Año :**2+5**,
+t.Mes..*111*2*Mes :**2+6**,
 t.Placa_Interna.0.*151*992*Placa Interna :*1*2+3**1*1,
 t.Placa_Rodaje..*151*993*Placa Rodaje :*1*2+4**1*1,
 t.Fec_Consumo..*111*3*Dia :**2+7,
-t.Dotacion_Abastecida..*101*4*Abastecimiento :**4+12,
-t.Saldo_x_Mes..*101*5*Saldo :*1*3+11',
+t.Dotacion_Abastecida.0.*101*4*Abastecimiento :**4+12,
+t.Saldo_x_Mes..*101*5*Saldo Mensual :*1*3+11',
 't.dbo.prog_abastecimiento_diario',
 @Utabla)
 )
-select concat((select
+select concat(isnull((select
 t.Id_AbastecimientoDiario, t,
 t.Id_ProgVehiculo, t,
 t.Id_Unidad, t,
@@ -150,9 +155,11 @@ from dbo.prog_abastecimiento_diario t
 outer apply(select*from dbo.prog_tarjeta_multiflota tt where tt.Id_Multiflota = t.Id_Multiflota)tt
 outer apply(select*from tmp001_progVehiculo ttt where ttt.Id_ProgVehiculo = t.Id_ProgVehiculo)ttt
 where t.activo = 1 and t.Id_AbastecimientoDiario = @data
-for xml path, type).value('.', 'varchar(max)'),
+for xml path, type).value('.', 'varchar(max)'), isnan.dato),
 m.dato, g.dato, u.dato, gr.dato, t1.dato, t3.dato, t4.dato, t5.dato, t6.dato, t7.dato)
-from tmp001_sep cross apply tmp001_meta m cross apply tmp001_grupos g
+from tmp001_sep cross apply tmp001_meta m
+cross apply tmp001_periodoActual isnan
+cross apply tmp001_grupos g
 cross apply hlp001_unidad u cross apply hlp001_grifo gr
 outer apply(select*from tmpAux_Unidad where item=0) t1
 -- outer apply(select*from tmpAux_grifo where item=0) t2
@@ -175,6 +182,7 @@ exec dbo.usp_listar_prog_abastecimiento_diario 0
 select*from dbo.menu order by 1
 
 
+return
 select*from mastertable('dbo.prog_abastecimiento_diario')
 -- select*from mastertable('dbo.grifo')
 select*from mastertable('dbo.prog_tarjeta_multiflota')
