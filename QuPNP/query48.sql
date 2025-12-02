@@ -8,7 +8,7 @@ begin
 begin try
 set nocount on
 set language english
-declare @item int = 0, @periodo_intervalo int = -2
+declare @item int = 0, @periodo_intervalo int = -3
 create table #tmp001_split(
     item int identity,
     dato varchar(100) collate database_default
@@ -63,11 +63,11 @@ exec dbo.usp_listar_tablas 'dbo.prog_abastecimiento_diario'
 --     from tmp001_sep
 -- )
 ,tmpAux_placaVehiculo(dato)as(
-    select concat(i, 992, r, '300.2*0****101**Placa Interna:', r, '993|2*81|3*82|4*83|5*84|6*85|7')
+    select concat(i, 992, r, '300.2*0****101**Placa Interna:', r, '993|2*81|3*82|4*83|5*84|6*85|7*771|9')
     from tmp001_sep
 )
 ,tmpAux_placaRodaje(dato)as(
-    select concat(i, 993, r, '300.3*0****101**Placa Rodaje:', r, '992|1*81|3*82|4*83|5*84|6*85|7')
+    select concat(i, 993, r, '300.3*0****101**Placa Rodaje:', r, '992|1*81|3*82|4*83|5*84|6*85|7*771|9')
     from tmp001_sep
 )
 ,tmp001_cab_grifo(dato)as(
