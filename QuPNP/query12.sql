@@ -6,7 +6,7 @@ as
 begin
 set nocount on
 set language english
-declare @periodo_intervalo int = -2
+declare @periodo_intervalo int = -3
 
 ;with tmp001_sep(t,r,i)as(
     select*from(values('|','~','^'))t(sepCampo,sepReg,sepLst)

@@ -8,7 +8,7 @@ begin
 begin try
 set nocount on
 set language english
-declare @periodo_intervalo int = -2
+declare @periodo_intervalo int = -3
 create table #tmp001_param(
     interna varchar(50) collate database_default,
     rodajes varchar(50) collate database_default
@@ -21,8 +21,8 @@ insert into #tmp001_param exec(@data)
 )
 ,tmp001_cab(dato)as(
     select concat(
-    'a1|PLACA INTERNA|PLACA RODAJE|TARJETA MULTIFLOTA|TIPO VEHICULO|TIPO COMBUSTIBLE|GLNxDIA|GLNXMES|ID', r,
-    '10|200|200|400|450|450|200|200|10')
+    'a1|PLACA INTERNA|PLACA RODAJE|TARJETA MULTIFLOTA|TIPO VEHICULO|TIPO COMBUSTIBLE|GLNxDIA|GLNXMES|ID|IDG', r,
+    '10|200|200|400|450|450|200|200|10|10')
     from tmp001_sep
 )
 ,tmp001_periodo(mes, anno) as(
@@ -31,7 +31,8 @@ insert into #tmp001_param exec(@data)
 )
 select concat(c.dato, (select r,
 t.Id_ProgVehiculo, t, t.placa_interna, t, t.placa_rodaje, t, tm.nro_tarjeta, t,
-ltrim(tv.DescripcionL), t, ltrim(toc.DescripcionL), t, tt.GlnxDia, t, tt.GlnxMes, t, tm.Id_Multiflota
+ltrim(tv.DescripcionL), t, ltrim(toc.DescripcionL), t, tt.GlnxDia, t, tt.GlnxMes, t,
+tm.Id_Multiflota, t, t.id_grifo
 from dbo.prog_vehiculo t cross apply dbo.prog_dotacion tt
 cross apply tmp001_periodo pp
 cross apply #tmp001_param pa
@@ -56,4 +57,6 @@ exec dbo.usp_buscar_prog_abastecimiento_diario_vehiculo '736|'
 exec dbo.usp_buscar_prog_abastecimiento_diario_vehiculo '|736'
 
 
-select*from mastertable('dbo.prog_tarjeta_multiflota')
+-- select*from mastertable('dbo.prog_vehiculo')
+
+select*from dbo.prog_vehiculo where placa_interna = 'pl-10987'
